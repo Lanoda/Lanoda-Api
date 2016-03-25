@@ -1,0 +1,14 @@
+{
+  "name": "Lanoda-Api",
+  "description": "The Lanoda Api project.",
+  "scripts": {
+  },
+  "env": {
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+
+  ]
+}
