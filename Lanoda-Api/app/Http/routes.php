@@ -14,3 +14,12 @@
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+
+$app->post('/request_token', 'AuthController@requestApiToken');
+
+$app->group(['prefix' => 'api', 'middleware' => 'auth:api'], function () use ($app) {
+	$app->get('user/{user_id}/profile', function ($user_id) {
+		return $user_id;		
+	});
+});
+
