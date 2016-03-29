@@ -1,0 +1,26 @@
+{
+  "name": "Lanoda-Api",
+  "description": "The Lanoda Api",
+  "scripts": {
+    "postdeploy": "composer update"
+  },
+  "env": {
+    "APP_DEBUG": {
+      "required": true
+    },
+    "APP_ENV": {
+      "required": true
+    },
+    "APP_KEY": {
+      "required": true
+    }
+  },
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "urn:buildpack:heroku/php"
+    }
+  ]
+}
