@@ -1,5 +1,47 @@
 <?php
 
+$dbInfo = [
+	'host' => null,
+	'port' => null,
+	'base' => null,
+	'user' => null,
+	'pass' => null,
+];
+
+$dbConnString = getenv('DATABASE_URL');
+if ($dbConnString != null) 
+{
+	$dbUrlArray = explode('://', $dbConnString);
+	if (count($dbUrlArray) > 1) 
+	{
+		$userPassTOHostPortBase = explode('@', $dbUrlArray[1]);
+		if (count($userPassTOHostPortBase) > 0) 
+		{
+			$userTOPass = explode(':', $userPassTOHostPortBase[0]);
+			if (count($userTOPass) > 1) 
+			{
+				$dbInfo['user'] = $userTOPass[0];
+				$dbInfo['pass'] = $userTOPass[1];
+			}
+
+			$hostPortTOBase = explode('/', $userPassTOHostPortBase[1]);
+			if (count($hostPortTOBase) > 1)
+			{
+				$hostTOPort = explode(':', $hostPortTOBase[0]);
+				if (count($hostTOPort) > 1)
+				{
+					$dbInfo['host'] = $hostTOPort[0];
+					$dbInfo['port'] = $hostTOPort[1];
+				}
+
+				$dbInfo['base'] = $hostPortTOBase[1];
+			}
+			$portBase
+		}
+	}
+}
+
+
 return [
 
     /*
@@ -26,7 +68,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'pgsql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -68,11 +110,11 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST', $dbInfo['host'] ?: 'localhost'),
+            'port' => env('DB_PORT', $dbInfo['port'] ?: '5432'),
+            'database' => env('DB_DATABASE', $dbInfo['base'] ?: 'forge'),
+            'username' => env('DB_USERNAME', $dbInfo['user'] ?: 'forge'),
+            'password' => env('DB_PASSWORD', $dbInfo['pass'] ?: ''),
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
