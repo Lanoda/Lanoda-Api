@@ -36,10 +36,10 @@ if ($dbConnString != null)
 
 				$dbInfo['base'] = $hostPortTOBase[1];
 			}
-			$portBase
 		}
 	}
 }
+
 
 
 return [
