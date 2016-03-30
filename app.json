@@ -2,6 +2,7 @@
   "name": "Lanoda-Api",
   "description": "The Lanoda Api",
   "scripts": {
+    "post-deploy": "php artisan migrate --seed"
   },
   "env": {
     "APP_DEBUG": {
