@@ -1,1 +1,0 @@
-psql -h ec2-107-21-101-67.compute-1.amazonaws.com -p 5432 -U vrxioievcwbcix -W d7mjao54mckdcc
