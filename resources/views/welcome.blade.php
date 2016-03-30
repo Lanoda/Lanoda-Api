@@ -39,6 +39,7 @@
         <div class="container">
             <div class="content">
                 <div class="title">Laravel 5</div>
+                {{ 'database: ' . getenv('DATABASE_URL') }}
             </div>
         </div>
     </body>
