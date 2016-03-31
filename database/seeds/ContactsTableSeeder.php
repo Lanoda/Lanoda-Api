@@ -13,7 +13,7 @@ class ContactsTableSeeder extends Seeder
     public function run()
     {
 
-        if (env('APP_ENV') == 'dev') {
+        if (env('APP_ENV') == 'dev' || env('APP_ENV') == 'test') {
             $faker = Faker\Factory::create();
 
             foreach (range(1, 30) as $index)

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\User;
 use App\Contact;
 
 class DatabaseSeeder extends Seeder
@@ -12,10 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-    	Contact::truncate();
+        // User::truncate();
+    	// Contact::truncate();
 
     	Eloquent::unguard();
 
+        $this->call(UsersTableSeeder::class);
         $this->call(ContactsTableSeeder::class);
     }
 }
