@@ -12,7 +12,14 @@ class Contact extends Model
      * @var array
      */
     protected $fillable = [
-        'firstname', 'lastname',
+        'firstname', 
+        'middlename', 
+        'lastname',
+        'phone',
+        'email',
+        'address',
+        'age',
+        'birthday',
     ];
 
     /**
@@ -21,4 +28,11 @@ class Contact extends Model
      * @var array
      */
     protected $hidden = [];
+
+    protected $with = array('user');
+
+    public function user() 
+    {
+        return $this->belongsTo('App\User', 'user_id');
+    }
 }

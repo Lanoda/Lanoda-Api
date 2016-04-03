@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Contact;
+use App\Note;
 
 class ContactsTableSeeder extends Seeder
 {
@@ -13,30 +14,50 @@ class ContactsTableSeeder extends Seeder
     public function run()
     {
 
-        if (env('APP_ENV') == 'dev' || env('APP_ENV') == 'test') {
-            $faker = Faker\Factory::create();
+        if (env('APP_ENV') == 'local' || env('APP_ENV') == 'test') {
+            $this->command->info('Creating fake Contacts...');
 
+            $faker = Faker\Factory::create();
             foreach (range(1, 30) as $index)
             {
-                // Generate a name.
-                $fullname = $faker->name(1);
-                $arrayList = explode(' ', $fullname);
-                $name = ['First', 'Last'];
-                if (substr($arrayList[0], -1) == ".") {
-                    $name[0] = $arrayList[1];
-                    $name[1] = $arrayList[2];
-                } else {
-                    $name[0] = $arrayList[0];
-                    $name[1] = $arrayList[1];
-                }
+                $firstName = $faker->firstName();
+                $middleName = $faker->firstName();
+                $lastName = $faker->lastName();
+                $urlName = str_replace(' ', '', $firstName.'-'.$middleName.'-'.$lastName);
 
                 // Insert the Contact
-                Contact::create([
-                    'firstname' => $name[0],
-                    'lastname' => $name[1],
-                    'some_bool' => $faker->boolean(),
-                ]);
+                $existingContact = Contact::find($index);
+                if ($existingContact != null) {
+                    $existingContact->update([
+                        'user_id'   => $faker->numberBetween(1, 2),
+                        'url_name'  => $urlName,
+                        'firstname' => $firstName,
+                        'middlename'=> $middleName,
+                        'lastname'  => $lastName,
+                        'phone'     => $faker->phoneNumber(),
+                        'email'     => $faker->email(),
+                        'address'   => $faker->address(),
+                        'age'       => $faker->numberBetween(18, 100),
+                        'birthday'  => $faker->date(),
+                    ]);
+                } else {
+                    Contact::create([
+                        'id'        => $index,
+                        'user_id'   => $faker->numberBetween(1, 2),
+                        'url_name'  => $urlName,
+                        'firstname' => $firstName,
+                        'middlename'=> $middleName,
+                        'lastname'  => $lastName,
+                        'phone'     => $faker->phoneNumber(),
+                        'email'     => $faker->email(),
+                        'address'   => $faker->address(),
+                        'age'       => $faker->numberBetween(18, 100),
+                        'birthday'  => $faker->date(),
+                    ]);
+                }
             }
+
+            $this->command->info('Creating fake Contacts...');
         }
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Contact;
 
 use App\Http\Controllers\Controller;
 use App\Contact;
-use Response;
+use App\Http\Requests\Request;
 
 
 class ContactsController extends Controller
@@ -94,9 +94,9 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update($id)
+    public function update($id, Request $request)
     {
-        //
+        Contact::find($id)->update($request->all());
     }
 
     /**
@@ -107,7 +107,7 @@ class ContactsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Contact::delete($id);
     }
 
 
@@ -132,8 +132,14 @@ class ContactsController extends Controller
     {
         return [
             'firstname' => $contact['firstname'],
-            'lastname' => $contact['lastname'],
-            'active' => (boolean) $contact['some_bool'],
+            'middlename'=> $contact['middlename'],
+            'lastname'  => $contact['lastname'],
+            'phone'     => $contact['phone'],
+            'email'     => $contact['email'],
+            'address'   => $contact['address'],
+            'age'       => $contact['age'],
+            'birthday'  => $contact['birthday'],
+            'BelongsTo' => $contact['user']['firstname'],
         ];
     }
 }
