@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Contact;
 
 use App\Http\Controllers\Controller;
-use App\Contact;
 use App\Http\Requests\Request;
+use Response;
+
+use App\Contact;
 
 
 class ContactsController extends Controller
