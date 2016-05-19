@@ -23,7 +23,12 @@ class ApiClientsTableSeeder extends Seeder
     			'client_id' => $apiClientId,
     			'client_secret' => str_random(64)
     		];
-    		ApiClient::create($apiClient);
+    		$existingApiClient = ApiClient::where('client_id', $apiClientId)->first();
+    		if ($existingApiClient != null) {
+    			$existingApiClient->update($apiClient);
+    		} else {
+	    		ApiClient::create($apiClient);
+    		}
     	}
     }
 }
