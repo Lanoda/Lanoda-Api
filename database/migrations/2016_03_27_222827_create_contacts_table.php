@@ -16,15 +16,14 @@ class CreateContactsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('image_id')->unsigned()->nullable();
-            $table->string('url_name')->unique();
-            $table->string('firstname');
-            $table->string('middlename');
-            $table->string('lastname');
-            $table->string('phone');
-            $table->string('email');
-            $table->string('address');
-            $table->integer('age');
-            $table->date('birthday');
+            $table->string('firstname')->nullable();
+            $table->string('middlename')->nullable();
+            $table->string('lastname')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('address')->nullable();
+            $table->integer('age')->nullable();
+            $table->date('birthday')->nullable();
             $table->timestamps();
         });
     }

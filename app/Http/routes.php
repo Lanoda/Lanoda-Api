@@ -11,9 +11,10 @@
 |
 */
 
-//Route::group(['prefix' => 'api/v1'], function () {
+Route::group(['middleware' => 'api'], function () {
 	Route::resource('contacts', 'Contact\ContactsController');
-//});
+	Route::resource('notes', 'Note\NotesController');
+});
 
 Route::get('/', function () {
     return view('welcome');

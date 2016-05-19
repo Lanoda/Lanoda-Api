@@ -46,6 +46,7 @@ class UsersTableSeeder extends Seeder
 				$existing_user = User::create($user);
             }
 
+            // Add the 'Admin' role to user with Id '1'
             $admin_role = $existing_user->roles->where('id', 1);
             if ($admin_role == null) {
                 $existing_user->roles()->attach(Role::find(1));

@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Illuminate\Database\Seeder;
 use App\Contact;
 use App\Note;
@@ -13,51 +15,56 @@ class ContactsTableSeeder extends Seeder
      */
     public function run()
     {
-
         if (env('APP_ENV') == 'local' || env('APP_ENV') == 'test') {
-            $this->command->info('Creating fake Contacts...');
+
+            $timeStart = microtime(true);
+
+            $output = new ConsoleOutput();
+            $this->command->info('');
+            $this->command->line('Creating fake Contacts...');
+
+            $startRange = 1;
+            $endRange = 30;
+            $progressBar = new ProgressBar($output, $endRange);
 
             $faker = Faker\Factory::create();
-            foreach (range(1, 30) as $index)
+            foreach (range($startRange, $endRange) as $index)
             {
                 $firstName = $faker->firstName();
                 $middleName = $faker->firstName();
                 $lastName = $faker->lastName();
-                $urlName = str_replace(' ', '', $firstName.'-'.$middleName.'-'.$lastName);
 
                 // Insert the Contact
                 $existingContact = Contact::find($index);
+
+                $fakeContact = [
+                    'user_id'   => $faker->numberBetween(1, 2),
+                    'firstname' => $firstName,
+                    'middlename'=> $middleName,
+                    'lastname'  => $lastName,
+                    'phone'     => $faker->phoneNumber(),
+                    'email'     => $firstName . '.' . $lastName . '@' . $faker->freeemaildomain(),
+                    'address'   => $faker->address(),
+                    'age'       => $faker->numberBetween(18, 100),
+                    'birthday'  => $faker->date(),
+                ];
+
                 if ($existingContact != null) {
-                    $existingContact->update([
-                        'user_id'   => $faker->numberBetween(1, 2),
-                        'url_name'  => $urlName,
-                        'firstname' => $firstName,
-                        'middlename'=> $middleName,
-                        'lastname'  => $lastName,
-                        'phone'     => $faker->phoneNumber(),
-                        'email'     => $faker->email(),
-                        'address'   => $faker->address(),
-                        'age'       => $faker->numberBetween(18, 100),
-                        'birthday'  => $faker->date(),
-                    ]);
+                    $existingContact->update($fakeContact);
                 } else {
-                    Contact::create([
-                        'id'        => $index,
-                        'user_id'   => $faker->numberBetween(1, 2),
-                        'url_name'  => $urlName,
-                        'firstname' => $firstName,
-                        'middlename'=> $middleName,
-                        'lastname'  => $lastName,
-                        'phone'     => $faker->phoneNumber(),
-                        'email'     => $faker->email(),
-                        'address'   => $faker->address(),
-                        'age'       => $faker->numberBetween(18, 100),
-                        'birthday'  => $faker->date(),
-                    ]);
+                    Contact::create($fakeContact);
                 }
+
+                $progressBar->advance();
             }
 
-            $this->command->info('Creating fake Contacts...');
+            $progressBar->finish();
+
+            $totalTime = microtime(true) - $timeStart;
+            $this->command->info('');
+            $this->command->info('Time: ' . $totalTime . ' seconds');
+            $this->command->info('');
+            $this->command->info('');
         }
     }
 }

@@ -12,6 +12,8 @@ class Contact extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
+        'url_name',
         'firstname', 
         'middlename', 
         'lastname',
@@ -27,9 +29,14 @@ class Contact extends Model
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = ['url_name'];
 
-    protected $with = array('user');
+    /**
+     * The related objects that should be loaded as well.
+     *
+     * @var array
+     */
+    protected $with = ['user'];
 
     public function user() 
     {
