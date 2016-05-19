@@ -27,6 +27,10 @@ class VerifyApiToken {
     private function validateApiToken($request) 
     {
     	// Put validation logic here.
+
+        if($request->input('api_token') != null) {
+            
+        }
     	return true;
     }
 }
