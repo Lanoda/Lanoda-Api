@@ -17,7 +17,8 @@ class CreateApiClientsTable extends Migration
             $table->increments('id');
             $table->string('client_id')->unique();
             $table->string('client_secret', 64);
-            $table->uuid('api_token');
+            $table->uuid('api_token')->nullable();
+            $table->timestamp('api_token_expires')->nullable();
             $table->timestamps();
         });
     }
