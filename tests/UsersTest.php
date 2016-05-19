@@ -1,6 +1,6 @@
 <?php
 
-class ContactsTest extends TestCase 
+class UsersTest extends TestCase 
 {
 
 	public function testDatabase () 
