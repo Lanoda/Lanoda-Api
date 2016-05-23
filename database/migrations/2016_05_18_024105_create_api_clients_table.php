@@ -16,9 +16,7 @@ class CreateApiClientsTable extends Migration
         Schema::create('api_clients', function (Blueprint $table) {
             $table->increments('id');
             $table->string('client_id')->unique();
-            $table->string('client_secret', 64);
-            $table->uuid('api_token')->nullable();
-            $table->timestamp('api_token_expires')->nullable();
+            $table->string('client_secret', 32);
             $table->timestamps();
         });
     }

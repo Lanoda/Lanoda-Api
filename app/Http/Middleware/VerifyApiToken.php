@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\ApiClient;
 
 class VerifyApiToken {
 
@@ -28,9 +29,14 @@ class VerifyApiToken {
     {
     	// Put validation logic here.
 
-        if($request->input('api_token') != null) {
-            
+        if($request->has('api_token'))
+        {
+            $apiTokenResult = ApiToken::where('api_token', $request->input('api_token'))->first();
+            if ($apiTokenResult != null && $apiTokenResult->expires < date('Y-m-d H:i:s')) 
+            {
+                return true;
+            }
         }
-    	return true;
+    	return false;
     }
 }
