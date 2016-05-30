@@ -15,7 +15,7 @@ class CreateApiTokenTable extends Migration
         // Notes
         Schema::create('api_tokens', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('api_token', 64)->unique();
+            $table->string('api_token', 32)->unique();
             $table->string('client_id');
             $table->integer('user_id')->unsigned();
             $table->timestamp('expires');
