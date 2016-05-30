@@ -3,9 +3,13 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Session\TokenMismatchException;
+use Carbon\Carbon;
 use App\ApiClient;
+use App\ApiToken;
 
-class VerifyApiToken {
+class VerifyApiToken
+{
 
     /**
      * Handle an incoming request.
@@ -28,11 +32,10 @@ class VerifyApiToken {
     private function validateApiToken($request) 
     {
     	// Put validation logic here.
-
-        if($request->has('api_token'))
+        if($request->hasHeader('Lanoda-Api_ApiToken'))
         {
-            $apiTokenResult = ApiToken::where('api_token', $request->input('api_token'))->first();
-            if ($apiTokenResult != null && $apiTokenResult->expires < date('Y-m-d H:i:s')) 
+            $apiTokenResult = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
+            if ($apiTokenResult != null && $apiTokenResult->expires > Carbon::now())
             {
                 return true;
             }
