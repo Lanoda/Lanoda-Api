@@ -14,9 +14,16 @@ class CreateContactsTable extends Migration
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->boolean('some_bool');
+            $table->integer('user_id')->unsigned();
+            $table->integer('image_id')->unsigned()->nullable();
+            $table->string('firstname')->nullable();
+            $table->string('middlename')->nullable();
+            $table->string('lastname')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('address')->nullable();
+            $table->integer('age')->nullable();
+            $table->date('birthday')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +35,9 @@ class CreateContactsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('contacts');
+        if (Schema::hasTable('contacts'))
+        {
+            Schema::drop('contacts');
+        }
     }
 }

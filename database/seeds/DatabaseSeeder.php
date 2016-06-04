@@ -18,7 +18,10 @@ class DatabaseSeeder extends Seeder
 
     	Eloquent::unguard();
 
+        $this->call(RolesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(ContactsTableSeeder::class);
+        $this->call(ApiClientsTableSeeder::class);
+        $this->call(ApiTokensTableSeeder::class);
     }
 }

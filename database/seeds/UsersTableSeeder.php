@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\User;
+use App\Role;
 
 class UsersTableSeeder extends Seeder
 {
@@ -16,13 +17,15 @@ class UsersTableSeeder extends Seeder
     	$defaultUsers = [
     		[
     			'id' => 1,
-    			'name' => 'Isaac',
+    			'firstname' => 'Isaac',
+    			'lastname' => 'Van Houten',
     			'email' => 'isaac.vanh@gmail.com',
     			'password' => bcrypt('the1saacvh'),
     		],
     		[
     			'id' => 2,
-    			'name' => 'Aaron',
+    			'firstname' => 'Aaron',
+    			'lastname' => 'Retter',
     			'email' => 'retteramj@gmail.com',
     			'password' => bcrypt('retter'),
     		],
@@ -40,8 +43,15 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-            	User::create($user);
+				$existing_user = factory(App\User::class)->create($user);
             }
+
+            // Add the 'Admin' role to user with Id '1'
+            $admin_role = $existing_user->roles->where('id', $existing_user->id);
+            if ($admin_role == null) {
+                $existing_user->roles()->attach(Role::find(1));
+            }
+            $existing_user->save();
         }
         $this->command->info('Default users created.');
     }
