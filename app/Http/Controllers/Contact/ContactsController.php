@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Contact;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Response;
 
+use App\User;
 use App\Contact;
 
 
@@ -27,9 +29,17 @@ class ContactsController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(User $user)
     {
-        $contacts = Contact::all();
+        $authUser = Auth::user();
+        if ($authUser == null || $authUser->id != $user->id) {
+            return Response::Json([
+                'data' => null,
+                'error' => 'You are not authorized to access this resource.'
+            ], 401);
+        }
+
+        $contacts = $user->contacts;
         return Response::json([
             'data' => $this->transformCollection($contacts),
         ], 200);

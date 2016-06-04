@@ -11,12 +11,12 @@ class ApiToken extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['api_token', 'client_id', 'user_id', 'expires'];
 
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = ['user_id'];
 }

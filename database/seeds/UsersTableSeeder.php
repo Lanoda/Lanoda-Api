@@ -43,11 +43,11 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-				$existing_user = User::create($user);
+				$existing_user = factory(App\User::class)->create($user);
             }
 
             // Add the 'Admin' role to user with Id '1'
-            $admin_role = $existing_user->roles->where('id', 1);
+            $admin_role = $existing_user->roles->where('id', $existing_user->id);
             if ($admin_role == null) {
                 $existing_user->roles()->attach(Role::find(1));
             }

@@ -3,6 +3,8 @@
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Illuminate\Database\Seeder;
+
+use Carbon\Carbon;
 use App\Contact;
 use App\Note;
 
@@ -33,6 +35,7 @@ class ContactsTableSeeder extends Seeder
                 $firstName = $faker->firstName();
                 $middleName = $faker->firstName();
                 $lastName = $faker->lastName();
+                $age = $faker->numberBetween(18, 100);
 
                 // Insert the Contact
                 $existingContact = Contact::find($index);
@@ -45,8 +48,8 @@ class ContactsTableSeeder extends Seeder
                     'phone'     => $faker->phoneNumber(),
                     'email'     => $firstName . '.' . $lastName . '@' . $faker->freeemaildomain(),
                     'address'   => $faker->address(),
-                    'age'       => $faker->numberBetween(18, 100),
-                    'birthday'  => $faker->date(),
+                    'age'       => $age,
+                    'birthday'  => Carbon::now()->subYears($age),
                 ];
 
                 if ($existingContact != null) {

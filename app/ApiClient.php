@@ -11,12 +11,12 @@ class ApiClient extends Model
      *
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['client_id'];
 
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
-    protected $hidden = [];
+    protected $hidden = ['client_secret'];
 }

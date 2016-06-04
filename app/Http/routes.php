@@ -11,7 +11,7 @@
 |
 */
 
-Route::group(['middleware' => 'api'], function () {
+Route::group(['prefix' => 'users/{user}', 'middleware' => 'api'], function () {
 	Route::resource('contacts', 'Contact\ContactsController');
 	Route::resource('notes', 'Note\NotesController');
 });
@@ -19,3 +19,9 @@ Route::group(['middleware' => 'api'], function () {
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::group(['prefix' => 'api-token'], function() {
+	Route::post('request', 'ApiToken\ApiTokensController@requestApiTokenForUser');
+	Route::post('refresh', 'ApiToken\ApiTokensController@refreshApiToken');
+});
+

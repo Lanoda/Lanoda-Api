@@ -18,7 +18,7 @@ class CreateApiTokenTable extends Migration
             $table->string('api_token', 32)->unique();
             $table->string('client_id');
             $table->integer('user_id')->unsigned();
-            $table->timestamp('expires');
+            $table->dateTime('expires');
             $table->timestamps();
 
             $table->foreign('user_id')

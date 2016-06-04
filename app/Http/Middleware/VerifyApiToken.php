@@ -4,9 +4,12 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+
 use App\ApiClient;
 use App\ApiToken;
+use App\User;
 
 class VerifyApiToken
 {
@@ -35,11 +38,17 @@ class VerifyApiToken
         if($request->hasHeader('Lanoda-Api_ApiToken'))
         {
             $apiTokenResult = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
-            if ($apiTokenResult != null && $apiTokenResult->expires > Carbon::now())
+            if ($apiTokenResult != null)
             {
-                return true;
+                if ($apiTokenResult->expires > Carbon::now()) 
+                {
+                    if (Auth::loginUsingId($apiTokenResult->user_id)) {
+                        return true;
+                    }
+                }
             }
         }
-    	return false;
+
+        return false;
     }
 }
