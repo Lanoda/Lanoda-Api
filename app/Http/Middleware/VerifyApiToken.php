@@ -32,16 +32,16 @@ class VerifyApiToken
             return $next($request);
         }
 
-        return Response::Json(['api token' => $request->header('Lanoda-Api_ApiToken')]);
+        return Response::Json(['api token' => $request->header()]);
         //throw new TokenMismatchException;
     }
 
     private function validateApiToken($request) 
     {
     	// Put validation logic here.
-        if($request->hasHeader('Lanoda-Api_ApiToken'))
+        if($request->hasHeader('lanoda-api-token'))
         {
-            $apiTokenResult = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
+            $apiTokenResult = ApiToken::where('api_token', $request->header('lanoda-api-token'))->first();
             if ($apiTokenResult != null)
             {
                 if ($apiTokenResult->expires > Carbon::now())
