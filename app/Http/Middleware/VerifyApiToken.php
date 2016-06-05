@@ -8,6 +8,7 @@ use Illuminate\Session\TokenExpiredException;
 use Illuminate\Session\TokenAuthenticationException;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Response;
 
 use App\ApiClient;
 use App\ApiToken;
@@ -31,7 +32,8 @@ class VerifyApiToken
             return $next($request);
         }
 
-        throw new TokenMismatchException;
+        return Response::Json(['api token' => $request->header('Lanoda-Api_ApiToken')]);
+        //throw new TokenMismatchException;
     }
 
     private function validateApiToken($request) 
