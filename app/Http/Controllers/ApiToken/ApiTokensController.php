@@ -79,11 +79,19 @@ class ApiTokensController extends Controller
         }
 
         $apiToken = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
-        if ($apiToken == null || $apiToken->client_id != $request->input('client_id')) 
+        if ($apiToken == null)
         {
             return Response::json([
                 'data' => null,
-                'error' => 'Invalid credentials. Include a \'cliend_id\' in your request.',
+                'error' => 'Api Token not found.'
+            ], 401);
+        }
+
+        if ($apiToken->client_id != $request->input('client_id')) 
+        {
+            return Response::json([
+                'data' => null,
+                'error' => 'Invalid credentials, \'cliend_id\'.',
             ], 401);
         }
 

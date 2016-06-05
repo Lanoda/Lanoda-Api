@@ -45,6 +45,20 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
+        if ($e instanceof TokenExpiredException) {
+            return Response::json([
+                'data' => $e,
+                'error' => 'Your token is expired.'
+            ]);
+        }
+
+        if ($e instanceof TokenAuthenticationException) {
+            return Response::json([
+                'data' => $e,
+                'error' => 'The user associated with your token could not be authenticated.'
+            ]);
+        }
+
         return parent::render($request, $e);
     }
 }
