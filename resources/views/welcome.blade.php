@@ -38,18 +38,7 @@
     <body>
         <div class="container">
             <div class="content">
-                <div class="title">Laravel 5</div>
-                {{ 'database: ' . getenv('DATABASE_URL') }}
-
-                <ul style="font-weight: bold;">
-                    @foreach ($apiTokens as $apiToken)
-                        <li>
-                            <div><span>Api Token: </span><span>{{ $apiToken->api_token }}</span></div>
-                            <div><span>Client Id: </span><span>{{ $apiToken->client_id }}</span></div>
-                            <div><span>User Id: </span><span>{{ $apiToken->user_id }}</span></div>
-                        </li>
-                    @endforeach
-                </ul>
+                <div class="title">Lanoda Api</div>
             </div>
         </div>
     </body>
