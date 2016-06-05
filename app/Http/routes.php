@@ -17,7 +17,7 @@ Route::group(['prefix' => 'users/{user}', 'middleware' => 'api'], function () {
 });
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', ['apiTokens' => App\ApiToken::all(), 'apiClients' => App\ApiClient::all()]);
 });
 
 Route::group(['prefix' => 'api-token'], function() {

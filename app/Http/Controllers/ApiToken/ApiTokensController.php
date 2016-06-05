@@ -60,8 +60,7 @@ class ApiTokensController extends Controller
 
         return Response::json([
             'data' => [
-                'api_token' => $apiToken->api_token,
-                'expires' => $apiToken->expires
+                'api_token' => $apiToken,
             ],
         ], 200);
     }
@@ -73,11 +72,6 @@ class ApiTokensController extends Controller
      */
     public function refreshApiToken(Request $request)
     {
-        if (!$request->hasHeader('Lanoda-Api_ApiToken')) 
-        {
-            throw new TokenMismatchException;
-        }
-
         $apiToken = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
         if ($apiToken == null)
         {
@@ -104,8 +98,7 @@ class ApiTokensController extends Controller
 
         return Response::json([
             'data' => [
-                'api_token' => $apiToken->api_token,
-                'expires' => $apiToken->expires,
+                'api_token' => $apiToken,
             ],
         ], 200);
     }
