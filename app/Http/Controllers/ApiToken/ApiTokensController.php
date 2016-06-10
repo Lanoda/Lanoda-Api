@@ -30,7 +30,7 @@ class ApiTokensController extends Controller
      *
      * @return Response
      */
-    public function requestApiTokenForUser(Request $request)
+    public function requestApiToken(Request $request)
     {
         $apiClient = ApiClient::where('client_id', $request->input('client_id'))->first();
         $user = User::where('email', $request->input('email'))->first();
@@ -56,7 +56,13 @@ class ApiTokensController extends Controller
             'expires' => Carbon::now()->addDay()
         ];
 
-        $apiToken = ApiToken::create($apiTokenObj);
+        $apiToken = ApiToken::where(['client_id' => $apiClient->client_id, 'user_id' => $user->id])->first();
+        if ($apiToken == null) {
+            $apiToken = ApiToken::create($apiTokenObj);
+        } else {
+            $apiToken->expires = Carbon::now()->addDay();
+            $apiToken->save();
+        }
 
         return Response::json([
             'data' => [

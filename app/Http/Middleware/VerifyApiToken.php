@@ -32,8 +32,7 @@ class VerifyApiToken
             return $next($request);
         }
 
-        return Response::Json(['api token' => $request->header()]);
-        //throw new TokenMismatchException;
+        throw new TokenMismatchException;
     }
 
     private function validateApiToken($request) 

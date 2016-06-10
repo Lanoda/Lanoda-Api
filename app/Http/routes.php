@@ -21,7 +21,7 @@ Route::get('/', function () {
 });
 
 Route::group(['prefix' => 'api-token'], function() {
-	Route::post('request', 'ApiToken\ApiTokensController@requestApiTokenForUser');
-	Route::post('refresh', 'ApiToken\ApiTokensController@refreshApiToken');
+	Route::post('request', 'ApiToken\ApiTokensController@requestApiToken');
+	Route::put('refresh', 'ApiToken\ApiTokensController@refreshApiToken');
 });
 
