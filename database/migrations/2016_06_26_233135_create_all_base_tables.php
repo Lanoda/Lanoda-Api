@@ -199,10 +199,16 @@ class CreateAllBaseTables extends Migration
             Schema::drop('note_types');
         }
 
+        // Drop Contacts
+        if (Schema::hasTable('contacts'))
         {
+            Schema::drop('contacts');
         }
 
+        // Drop RoleUser
+        if (Schema::hasTable('role_user')) 
         {
+            Schema::drop('role_user');
         }
 
         // Drop ApiTokens
@@ -210,9 +216,17 @@ class CreateAllBaseTables extends Migration
         {
             Schema::drop('api_tokens');
         }
+
+        // Drop Users
+        if (Schema::hasTable('users')) 
         {
+            Schema::drop('users');
         }
+        
+        // Drop ApiClients
+        if (Schema::hasTable('api_clients'))
         {
+            Schema::drop('api_clients');
         }
 
         // ContactTypes
