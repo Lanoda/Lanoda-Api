@@ -3,9 +3,6 @@
 namespace App\Http\Controllers\Contact;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Helpers\ApiResult;
-use App\Http\Controllers\Helpers\ApiError;
-use App\Http\Controllers\Helpers\HttpStatusCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Response;
@@ -14,7 +11,7 @@ use App\User;
 use App\Contact;
 
 
-class ContactsController extends Controller
+class NotesController extends Controller
 {
 
     /**
@@ -34,15 +31,18 @@ class ContactsController extends Controller
      */
     public function index(User $user)
     {
+        $apiResult = null;
         $authUser = Auth::user();
         if ($authUser == null || $authUser->id != $user->id) {
-            $apiErrors = array(new ApiError('ContactsGet_Unauthorized', 'You are not authorized to access this resource.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            return Response::Json([
+                'data' => null,
+                'error' => 'You are not authorized to access this resource.'
+            ], 401);
         }
-        
-        $apiResult = new ApiResult($this->transformCollection($user->contacts), true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+
+        $contacts = $user->contacts;
+        $apiResult = $this->transformCollection($contacts);
+        return Response::json($apiResult, 200);
     }
 
     /**
@@ -62,26 +62,30 @@ class ContactsController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->has('user_id')) 
-        {
-            $apiErrors = array(new ApiError('ContactsPost_UserIdRequired', 'Contact must have a user_id.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::BadRequest);
+        if (!$request->has('user_id')) {
+            return Response::json([
+                'data' => null,
+                'error' => 'Contacts must have a user_id.'
+            ], 200);
         }
 
-        if ($request->input('firstname') == null && $request->input('lastname') == null 
-            && $request->input('email') == null && $request->input('phone') == null)
-        {
-            $errorId = 'ContactsPost_PrimaryFieldRequired';
-            $errorMsg = 'A Contact must have at least one of the following: First Name, Last name, Email, or Phone.';
-            $apiErrors = array(new ApiError($errorId, $errorMsg));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatuscode::BadRequest);
+        if ($request->input('firstname') == null
+            && $request->input('lastname') == null
+            && $request->input('email') == null
+            && $request->input('phone') == null) {
+            return Response::json([
+                'data' => null,
+                'error' => [
+                    'error_id' => '', 
+                    'message' => 'A Contact must have at least one of the following: First Name, Last Name, Email, or Phone.'
+                ]
+            ], 200);
         }
 
         $contact = Contact::create($request->all());
-        $apiResult = new ApiResult($contact, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return Response::json([
+            'data' => $this->transform($contact),
+        ], 200);
     }
 
     /**
@@ -90,17 +94,20 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function show(User $user, Contact $contact)
+    public function show(Contact $contact)
     {
+        $contact = Contact::find($id);
+
         if (!$contact) 
         {
-            $apiErrors = array(new ApiError('ContactGet_NotFound', 'Contact not found.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::NotFound);
+            return Response::json([
+                'error' => ['message' => 'Contact does not exist',]
+            ], 404);
         }
 
-        $apiResult = new ApiResult($this->transform($contact->toArray()), true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return Response::json([
+            'content' => $this->transform($contact->toArray()),
+        ], 200);
     }
 
     /**
@@ -120,7 +127,7 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(User $user, Contact $contact, Request $request)
+    public function update(Request $request, $id)
     {
         $rules = array(
             'user_id'    => 'required',
@@ -128,15 +135,22 @@ class ContactsController extends Controller
         );
 
         try {
+            $contact = Contact::find($id);
             $success = $contact->update($request->all(), $rules);
             $contact->save();
 
-            $apiResult = new ApiResult($this->transform($contact), true);
-            return Response::json($apiResult, HttpStatusCode::Ok);
+            return Response::json([
+                'content' => $contact, 
+                'success' => $success,
+                'errors' => [],
+            ], 200);
         }
         catch(Exception $e) {
-            $apiResult = new ApiResult(null, false, array(new ApiError('ContactPut_UpdateError', $e)));
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            return Response::json([
+                'content' => $contact,
+                'success' => false,
+                'errors' => [$e]
+            ], 500);
         }
 
     }
@@ -147,9 +161,9 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function destroy(User $user, Contact $contact)
+    public function destroy($id)
     {
-        $contact->delete();
+        Contact::delete($id);
     }
 
 

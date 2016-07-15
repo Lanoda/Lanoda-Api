@@ -11,11 +11,6 @@
 |
 */
 
-Route::group(['prefix' => 'users/{user}', 'middleware' => 'api'], function () {
-	Route::resource('contacts', 'Contact\ContactsController');
-	Route::resource('notes', 'Note\NotesController');
-});
-
 Route::get('/', function () {
     return view('welcome', ['apiTokens' => App\ApiToken::all(), 'apiClients' => App\ApiClient::all()]);
 });
@@ -23,5 +18,19 @@ Route::get('/', function () {
 Route::group(['prefix' => 'api-token'], function() {
 	Route::post('request', 'ApiToken\ApiTokensController@requestApiToken');
 	Route::put('refresh', 'ApiToken\ApiTokensController@refreshApiToken');
+});
+
+
+Route::group(['prefix' => 'users/{user}', 'middleware' => 'api'], function () {
+
+	// Contacts
+	Route::delete('contacts/{contact}', 'Contact\ContactsController@destroy');
+	Route::get('contacts', 'Contact\ContactsController@index');
+	Route::get('contacts/{contact}', 'Contact\ContactsController@show');
+	Route::post('contacts', 'Contact\ContactsController@store');
+	Route::put('contacts/{contact}', 'Contact\ContactsController@update');
+
+	// Notes
+	Route::resource('notes', 'Note\NotesController');
 });
 
