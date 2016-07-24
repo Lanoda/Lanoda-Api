@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Helpers\ApiResult;
 use App\Http\Controllers\Helpers\ApiError;
 use App\Http\Controllers\Helpers\HttpStatusCode;
+use App\Http\Controllers\Helpers\ModelHelper;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,10 +35,14 @@ class NotesController extends Controller
      *
      * @return Response
      */
-    public function showlist()
+    public function showlist(Request $request)
     {
         $authUser = Auth::user();
-        $apiResult = new ApiResult($this->transformCollection($authUser->notes), true);
+
+        $notes = Note::where('user_id', $authUser->id);
+        $transformCollection = 'App\Http\Controllers\Note\NotesController::transformCollection';
+        $content = ModelHelper::GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
+        $apiResult = new ApiResult($content, true);
         return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
@@ -46,7 +51,7 @@ class NotesController extends Controller
      *
      * @return Response
      */
-    public function showlistForContact(Contact $contact)
+    public function showlistForContact(Request $request, Contact $contact)
     {
         $authUser = Auth::user();
         if ($authUser->id != $contact->user_id)
@@ -55,7 +60,10 @@ class NotesController extends Controller
             return Response::Json($apiResult, HttpStatusCode::Unauthorized);
         }
 
-        $apiResult = new ApiResult($this->transformCollection($contact->notes), true);
+        $notes = Note::where('contact_id', $contact->id);
+        $transformCollection = 'App\Http\Controllers\Note\NotesController::transformCollection';
+        $content = ModelHelper::GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
+        $apiResult = new ApiResult($content, true);
         return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
@@ -193,10 +201,10 @@ class NotesController extends Controller
      * @param  $contacts
      * @return array
      */
-    private function transformCollection($notes)
+    public static function transformCollection($notes)
     {
         if ($notes == null) return array();
-        return array_map([$this, 'transform'], $notes->toArray());
+        return array_map('App\Http\Controllers\Note\NotesController::transform', $notes->toArray());
     }
 
     /**
@@ -205,7 +213,7 @@ class NotesController extends Controller
      * @param  $contact
      * @return array
      */
-    private function transform($note) 
+    public static function transform($note) 
     {
         return [
             'id'            => $note['id'],

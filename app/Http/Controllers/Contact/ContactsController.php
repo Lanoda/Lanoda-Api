@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Helpers\ApiResult;
 use App\Http\Controllers\Helpers\ApiError;
 use App\Http\Controllers\Helpers\HttpStatusCode;
+use App\Http\Controllers\Helpers\ModelHelper;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,10 +34,15 @@ class ContactsController extends Controller
      *
      * @return Response
      */
-    public function showlist()
+    public function showlist(Request $request)
     {
         $authUser = Auth::user();
-        $apiResult = new ApiResult($this->transformCollection($user->contacts), true);
+        $contacts = Contact::where('user_id', $authUser->id);
+
+        $transformCollection = 'App\Http\Controllers\Contact\ContactsController::transformCollection';
+        $content = ModelHelper::GetListResult($contacts, $request->all(), 'Contacts', 'id', $transformCollection);
+        
+        $apiResult = new ApiResult($content, true);
         return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
@@ -176,9 +182,9 @@ class ContactsController extends Controller
      * @param  $contacts
      * @return array
      */
-    private function transformCollection($contacts)
+    public static function transformCollection($contacts)
     {
-        return array_map([$this, 'transform'], $contacts->toArray());
+        return array_map('App\Http\Controllers\Contact\ContactsController::transform', $contacts->toArray());
     }
 
     /**
@@ -187,7 +193,7 @@ class ContactsController extends Controller
      * @param  $contact
      * @return array
      */
-    private function transform($contact) 
+    public static function transform($contact) 
     {
         return [
             'id'        => $contact['id'],

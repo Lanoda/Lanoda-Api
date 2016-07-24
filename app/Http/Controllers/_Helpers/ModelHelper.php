@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Helpers;
 
+
 class ModelHelper 
 {
     /**
      * Apply Filters to an eloquent set.
      *
      */
-    public function ApplyFilters($set, array $filters)
+    public static function ApplyFilters(&$set, $filterString)
     {
-        $returnSet = $set;
+        if ($filterString == null) return;
+
+        $filterVals = explode("|", $filterString);
+        $filters = array_map("App\Http\Controllers\Helpers\Filter::CreateFromString", $filterVals);
+
         if ($filters != null)
         {
             foreach ($filters as $filter)
@@ -26,17 +31,32 @@ class ModelHelper
                 {
                     // Equal-To
                     case "eq":
-                        $returnSet = $set->where($filter->Field, $values);
+                        $set = $set->where($filter->Field, $values);
                         break;
 
                     // Greater-Than
                     case "gt":
-                        $returnSet = $set->where($filter->Field, '>', $values);
+                        $set = $set->where($filter->Field, '>', $values);
                         break;
 
                     // Less-Than
                     case "lt":
-                        $returnSet = $set->where($filter->Field, '<', $values);
+                        $set = $set->where($filter->Field, '<', $values);
+                        break;
+
+                    case "il":
+                        for($i = 0; $i < count($values); $i++)
+                        {
+                            $values[$i] = '%' . $values[$i] . '%';
+                            if ($i == 0) 
+                            {
+                                $set = $set->where($filter->Field, "ilike", $values[$i]);
+                            }
+                            else 
+                            {
+                                $set = $set->orWhere($filter->Field, "ilike", $values[$i]);
+                            }
+                        }
                         break;
 
                     // Like (or 'contains')
@@ -44,44 +64,109 @@ class ModelHelper
                         for($i = 0; $i < count($values); $i++)
                         {
                             $values[$i] = '%' . $values[$i] . '%';
+                            if ($i == 0) 
+                            {
+                                $set = $set->where($filter->Field, "like", $values[$i]);
+                            }
+                            else 
+                            {
+                                $set = $set->orWhere($filter->Field, "like", $values[$i]);
+                            }
                         }
-                        $returnSet = $set->where($filter->Field, "LIKE", $values);
                         break;
 
-                    // Not
-                    case "nt":
-                        $returnSet = $set->where($filter->Field, "!=", $values)->orWhereNull($filter->Field);
+                    // Not Equal
+                    case "ne":
+                        $set = $set->where($filter->Field, "!=", $values)->orWhereNull($filter->Field);
                         break;
                 }
             }
         }
-
-        return $returnSet;
     }
     
     /**
      * Apply Sorts to an eloquent set.
      *
      */
-    public function ApplySorts($set, array $sorts)
+    public static function ApplySorts(&$set, $sortString, $primaryKey)
     {
-        $returnSet = $set;
+        if ($sortString == null) return;
+
+        $sortVals = explode("|", $sortString);
+        $sorts = array_map("App\Http\Controllers\Helpers\Sort::CreateFromString", $sortVals);
+
         foreach ($sorts as $sort)
         {
-            $returnSet = $returnSet->orderBy($sort->Field, $sort->Direction);
+            $set = $set->groupBy($primaryKey)->orderBy($sort->Field, $sort->Direction);
         }
-
-        return $returnSet;
     }
 
     /**
      * Apply Search to an eloquent set.$_COOKIE
      *
      */
-    public function ApplySearch($set, array $search) 
+    public static function ApplySearch(&$set, $search) 
     {
         
     }
+
+    /**
+     * Apply pagination
+     */
+     public static function ApplyPagination(&$set, &$pageIndex, &$pageSize) 
+     {
+        $pi = 0;
+        $ps = 50;
+        if ($pageIndex != null) {
+            $pi = $pageIndex;
+        }
+        if ($pageSize) {
+            $ps = $pageSize;
+        }
+
+        if ($pi !== -1 && $ps !== -1) {
+            $set = $set->skip($pi * $ps)->take($ps);
+        } else {
+            $set = $set;
+        }
+
+        $pageIndex = $pi;
+        $pageSize = $ps;
+     }
+
+
+    /**
+     * Apply commonly-used methods and create result
+     */
+     public static function GetListResult($set, array $requestVars, $listTitle, $primaryKey, $transformFunc) 
+     {
+        $pageIndex = $requestVars['pageIndex'] ?? 0;
+        $pageSize = $requestVars['pageSize'] ?? 48;
+
+        if ($set == null) {
+            return [
+                $listTitle => array(), 
+                'TotalResults' => 0, 
+                'PageIndex' => $pageIndex, 
+                'PageSize' => $pageSize
+            ];
+        }
+
+        ModelHelper::ApplyFilters($set, $requestVars['filters'] ?? null);
+        ModelHelper::ApplySearch($set, $requestVars['search'] ?? null);
+        $totalResults = $set->count();
+        ModelHelper::ApplySorts($set, $requestVars['sorts'] ?? null, $primaryKey);
+        ModelHelper::ApplyPagination($set, $pageIndex, $pageSize);
+
+        $content = [
+            $listTitle => $transformFunc($set->get()),
+            'TotalResults' => $totalResults,
+            'PageIndex' => $pageIndex,
+            'PageSize' => $pageSize
+        ];
+
+        return $content;
+     }
 }
 
 class Filter
