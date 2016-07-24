@@ -1,14 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Contact;
+namespace App\Http\Controllers\Note;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Helpers\ApiResult;
+use App\Http\Controllers\Helpers\ApiError;
+use App\Http\Controllers\Helpers\HttpStatusCode;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Response;
 
 use App\User;
 use App\Contact;
+use App\Note;
 
 
 class NotesController extends Controller
@@ -29,20 +34,29 @@ class NotesController extends Controller
      *
      * @return Response
      */
-    public function index(User $user)
+    public function showlist()
     {
-        $apiResult = null;
         $authUser = Auth::user();
-        if ($authUser == null || $authUser->id != $user->id) {
-            return Response::Json([
-                'data' => null,
-                'error' => 'You are not authorized to access this resource.'
-            ], 401);
+        $apiResult = new ApiResult($this->transformCollection($authUser->notes), true);
+        return Response::json($apiResult, HttpStatusCode::Ok);
+    }
+
+    /**
+     * Display a listing of the resource for a contact.
+     *
+     * @return Response
+     */
+    public function showlistForContact(Contact $contact)
+    {
+        $authUser = Auth::user();
+        if ($authUser->id != $contact->user_id)
+        {
+            $apiResult = ApiResult::Error('NoteGet_Unauthorized', 'You are not authorized to access this resource.');
+            return Response::Json($apiResult, HttpStatusCode::Unauthorized);
         }
 
-        $contacts = $user->contacts;
-        $apiResult = $this->transformCollection($contacts);
-        return Response::json($apiResult, 200);
+        $apiResult = new ApiResult($this->transformCollection($contact->notes), true);
+        return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
     /**
@@ -62,30 +76,21 @@ class NotesController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->has('user_id')) {
-            return Response::json([
-                'data' => null,
-                'error' => 'Contacts must have a user_id.'
-            ], 200);
-        }
+        $authUser = Auth::user();
 
-        if ($request->input('firstname') == null
-            && $request->input('lastname') == null
-            && $request->input('email') == null
-            && $request->input('phone') == null) {
-            return Response::json([
-                'data' => null,
-                'error' => [
-                    'error_id' => '', 
-                    'message' => 'A Contact must have at least one of the following: First Name, Last Name, Email, or Phone.'
-                ]
-            ], 200);
+        try
+        {
+            $noteModel = $request->all();
+            $noteModel["user_id"] = $authUser->id;
+            $note = Note::create($noteModel);
+            $apiResult = new ApiResult($this->transform($note), true);
+            return Response::json($apiResult, HttpStatusCode::Ok);
         }
-
-        $contact = Contact::create($request->all());
-        return Response::json([
-            'data' => $this->transform($contact),
-        ], 200);
+        catch (Exception $e)
+        {
+            $apiResult = ApiResult::Error('NoteCreate_InternalServerError', 'Create failed, the server encountered an error.');
+            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+        }
     }
 
     /**
@@ -94,20 +99,17 @@ class NotesController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function show(Contact $contact)
+    public function show(Request $request, Note $note)
     {
-        $contact = Contact::find($id);
-
-        if (!$contact) 
+        $authUser = Auth::user();
+        if ($authUser->id != $note->user_id)
         {
-            return Response::json([
-                'error' => ['message' => 'Contact does not exist',]
-            ], 404);
+            $apiResult = ApiResult::Error('NoteGet_Unauthorized', 'You are unauthorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
         }
 
-        return Response::json([
-            'content' => $this->transform($contact->toArray()),
-        ], 200);
+        $apiResult = new ApiResult($this->transform($note), true);
+        return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
     /**
@@ -127,30 +129,31 @@ class NotesController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Note $note)
     {
         $rules = array(
             'user_id'    => 'required',
             'email'      => 'required|email',
         );
-
-        try {
-            $contact = Contact::find($id);
-            $success = $contact->update($request->all(), $rules);
-            $contact->save();
-
-            return Response::json([
-                'content' => $contact, 
-                'success' => $success,
-                'errors' => [],
-            ], 200);
+        $authUser = Auth::user();
+        if ($authUser->id != $note->user_id)
+        {
+            $apiResult = ApiResult::Error('NoteUpdate_Unauthorized', 'Update failed, you are not authorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
         }
-        catch(Exception $e) {
-            return Response::json([
-                'content' => $contact,
-                'success' => false,
-                'errors' => [$e]
-            ], 500);
+
+        try 
+        {
+            $note->update($request->all(), $rules);
+            $note->save();
+
+            $apiResult = new ApiResult($this->transform($note), true);
+            return Response::json($apiResult, HttpStatusCode::Ok);
+        }
+        catch(Exception $e) 
+        {
+            $apiResult = ApiResult::Error('NoteUpdate_InternalServerError', 'Update Note failed, the server encountered an error.');
+            return Response::json($apiResult, HttpStatusCode::InternalServerError);
         }
 
     }
@@ -161,11 +164,28 @@ class NotesController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function destroy($id)
+    public function destroy(Note $note)
     {
-        Contact::delete($id);
-    }
+        $authUser = Auth::user();
+        if ($authUser->id != $note->user_id) 
+        {
+            $apiResult = ApiResult::Error('NoteDelete_Unauthorized', 'Delete failed, you are not authorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+        }
 
+        try
+        {
+            $note->delete();
+
+            $apiResult = new ApiResult(null, true);
+            return Response::json($apiResult, HttpStatusCode::NoContent);
+        }
+        catch (Exception $e)
+        {
+            $apiResult = ApiResult::Error('NoteDelete_InternalServerError', 'Delete failed, the server encountered an error.');
+            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+        }
+    }
 
     /**
      * Apply 'Transform' to a collection of contacts.
@@ -173,9 +193,10 @@ class NotesController extends Controller
      * @param  $contacts
      * @return array
      */
-    private function transformCollection($contacts)
+    private function transformCollection($notes)
     {
-        return array_map([$this, 'transform'], $contacts->toArray());
+        if ($notes == null) return array();
+        return array_map([$this, 'transform'], $notes->toArray());
     }
 
     /**
@@ -184,18 +205,17 @@ class NotesController extends Controller
      * @param  $contact
      * @return array
      */
-    private function transform($contact) 
+    private function transform($note) 
     {
         return [
-            'firstname' => $contact['firstname'],
-            'middlename'=> $contact['middlename'],
-            'lastname'  => $contact['lastname'],
-            'phone'     => $contact['phone'],
-            'email'     => $contact['email'],
-            'address'   => $contact['address'],
-            'age'       => $contact['age'],
-            'birthday'  => $contact['birthday'],
-            'BelongsTo' => $contact['user']['firstname'],
+            'id'            => $note['id'],
+            'user_id'       => $note['user_id'],
+            'contact_id'    => $note['contact_id'],
+            'type_id'       => $note['type_id'],
+            'title'         => $note['title'],
+            'body'          => $note['body'],
+            'created_at'    => $note['created_at'],
+            'updated_at'    => $note['updated_at'],
         ];
     }
 }

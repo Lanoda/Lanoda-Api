@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\ApiToken;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Helpers\ApiResult;
+use App\Http\Controllers\Helpers\HttpStatusCode;
 use Illuminate\Http\Request;
 use Response;
 
@@ -32,23 +34,21 @@ class ApiTokensController extends Controller
      */
     public function requestApiToken(Request $request)
     {
+        // Get ApiClient and Verify secret.
         $apiClient = ApiClient::where('client_id', $request->input('client_id'))->first();
+        if ($apiClient == null || $apiClient->client_secret != $request->input('client_secret')) {
+            $apiResult = ApiResult::Error('ApiTokenRequest_InvalidClientCredentials', 'Invalid Client credentials.');
+        	return Response::json($apiResult, HttpStatusCode::BadRequest);
+        }
+
+        // Get User by email.
         $user = User::where('email', $request->input('email'))->first();
-
-        if ($apiClient->client_secret != $request->input('client_secret')) {
-        	return Response::json([
-        		'data' => null,
-        		'error' => 'Invalid Client credentials.'
-        	], 401);
-        }
-
         if ($user == null) {
-        	return Response::json([
-        		'data' => null,
-        		'error' => 'User not found.'
-        	], 404);
+            $apiResult = ApiResult::Error('ApiTokenRequest_UserNotFound', 'User not found.');
+        	return Response::json($apiResult, HttpStatusCode::NotFound);
         }
 
+        // Setup ApiToken object.
         $apiTokenObj = [
             'api_token' => str_random(32),
             'client_id' => $apiClient->client_id,
@@ -56,6 +56,7 @@ class ApiTokensController extends Controller
             'expires' => Carbon::now()->addDay()
         ];
 
+        // Update existing ApiToken, or create new.
         $apiToken = ApiToken::where(['client_id' => $apiClient->client_id, 'user_id' => $user->id])->first();
         if ($apiToken == null) {
             $apiToken = ApiToken::create($apiTokenObj);
@@ -64,11 +65,9 @@ class ApiTokensController extends Controller
             $apiToken->save();
         }
 
-        return Response::json([
-            'data' => [
-                'api_token' => $apiToken,
-            ],
-        ], 200);
+        // Return result
+        $apiResult = new ApiResult($apiToken, true);
+        return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
     /**
@@ -78,34 +77,30 @@ class ApiTokensController extends Controller
      */
     public function refreshApiToken(Request $request)
     {
-        $apiToken = ApiToken::where('api_token', $request->header('Lanoda-Api_ApiToken'))->first();
+        // Get existing ApiToken.
+        $apiToken = ApiToken::where('api_token', $request->header('lanoda-api-token'))->first();
         if ($apiToken == null)
         {
-            return Response::json([
-                'data' => null,
-                'error' => 'Api Token not found.'
-            ], 401);
+            $apiResult = ApiResult::Error('ApiTokenRefresh_ApiTokenNotFound', 'Api Token not found.');
+            return Response::json($apiResult, HttpStatusCode::NotFound);
         }
 
+        // Check if matching client_id.
         if ($apiToken->client_id != $request->input('client_id')) 
         {
-            return Response::json([
-                'data' => null,
-                'error' => 'Invalid credentials, \'cliend_id\'.',
-            ], 401);
+            $apiResult = ApiResult::Error('ApiTokenRefresh_InvalidCredentials', 'Invalid credentials, \'client_id\'.');
+            return Response::json($apiResult, HttpStatusCode::BadRequest);
         }
 
+        // Update ApiToken.
         $newApiToken = [
             'api_token' => str_random(32),
             'expires' => Carbon::now()->addDay()
         ];
-
         $apiToken->update($newApiToken);
 
-        return Response::json([
-            'data' => [
-                'api_token' => $apiToken,
-            ],
-        ], 200);
+        // Return result;
+        $apiResult = new ApiResult($apiToken, true);
+        return Response::json($apiResult, HttpStatusCode::Ok);
     }
 }

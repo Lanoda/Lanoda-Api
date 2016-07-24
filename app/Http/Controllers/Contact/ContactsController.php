@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Helpers\ApiResult;
 use App\Http\Controllers\Helpers\ApiError;
 use App\Http\Controllers\Helpers\HttpStatusCode;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Response;
@@ -32,15 +33,9 @@ class ContactsController extends Controller
      *
      * @return Response
      */
-    public function index(User $user)
+    public function showlist()
     {
         $authUser = Auth::user();
-        if ($authUser == null || $authUser->id != $user->id) {
-            $apiErrors = array(new ApiError('ContactsGet_Unauthorized', 'You are not authorized to access this resource.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
-        }
-        
         $apiResult = new ApiResult($this->transformCollection($user->contacts), true);
         return Response::json($apiResult, HttpStatusCode::Ok);
     }
@@ -62,22 +57,17 @@ class ContactsController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->has('user_id')) 
-        {
-            $apiErrors = array(new ApiError('ContactsPost_UserIdRequired', 'Contact must have a user_id.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::BadRequest);
-        }
-
         if ($request->input('firstname') == null && $request->input('lastname') == null 
             && $request->input('email') == null && $request->input('phone') == null)
         {
-            $errorId = 'ContactsPost_PrimaryFieldRequired';
-            $errorMsg = 'A Contact must have at least one of the following: First Name, Last name, Email, or Phone.';
-            $apiErrors = array(new ApiError($errorId, $errorMsg));
-            $apiResult = new ApiResult(null, false, $apiErrors);
+            $errorMsg = 'A Contact must have at least one of the following: \'firstname\', \'lastname\', \'email\', or \'phone\'.';
+            $apiResult = ApiRequest::Error('ContactCreate_PrimaryFieldRequired', $errorMsg);
             return Response::json($apiResult, HttpStatuscode::BadRequest);
         }
+
+        $authUser = Auth::user();
+        $contactModel = $request->all();
+        $contactModel["user_id"] = $authUser->id;
 
         $contact = Contact::create($request->all());
         $apiResult = new ApiResult($contact, true);
@@ -87,19 +77,19 @@ class ContactsController extends Controller
     /**
      * Display a specific resource.
      *
-     * @param  int  $id
+     * @param  Contact  $contact
      * @return Response
      */
-    public function show(User $user, Contact $contact)
+    public function show(Contact $contact)
     {
-        if (!$contact) 
+        $authUser = Auth::user();
+        if ($authUser->id != $contact->user_id)
         {
-            $apiErrors = array(new ApiError('ContactGet_NotFound', 'Contact not found.'));
-            $apiResult = new ApiResult(null, false, $apiErrors);
-            return Response::json($apiResult, HttpStatusCode::NotFound);
+            $apiResult = ApiResult::Error('ContactGet_Unauthorized', 'You are not authorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
         }
 
-        $apiResult = new ApiResult($this->transform($contact->toArray()), true);
+        $apiResult = new ApiResult($this->transform($contact), true);
         return Response::json($apiResult, HttpStatusCode::Ok);
     }
 
@@ -120,22 +110,31 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(User $user, Contact $contact, Request $request)
+    public function update(Request $request, Contact $contact)
     {
         $rules = array(
             'user_id'    => 'required',
             'email'      => 'required|email',
         );
 
-        try {
+        $authUser = Auth::user();
+        if ($authUser->id = $contact->user_id)
+        {
+            $apiResult = ApiResult::Error('ContactUpdate_Unauthorized', 'You are not authorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+        }
+
+        try 
+        {
             $success = $contact->update($request->all(), $rules);
             $contact->save();
 
             $apiResult = new ApiResult($this->transform($contact), true);
             return Response::json($apiResult, HttpStatusCode::Ok);
         }
-        catch(Exception $e) {
-            $apiResult = new ApiResult(null, false, array(new ApiError('ContactPut_UpdateError', $e)));
+        catch(Exception $e)
+        {
+            $apiResult = ApiResult::Error('ContactUpdate_UpdateFailed', 'Update failed, the server encountered an error.');
             return Response::json($apiResult, HttpStatusCode::InternalServerError);
         }
 
@@ -147,9 +146,27 @@ class ContactsController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function destroy(User $user, Contact $contact)
+    public function destroy(Contact $contact)
     {
-        $contact->delete();
+        $authUser = Auth::user();
+        if ($authUser->id != $contact->user_id)
+        {
+            $apiResult = ApiResult::Error('ContactDelete_Unauthorized', 'Delete failed, You are not authorized to access this resource.');
+            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+        }
+
+        try 
+        {
+            $contact->delete();
+
+            $apiResult = new ApiResult(null, true);
+            return Response::json($apiResult, HttpStatusCode::NoContent);
+        }
+        catch (Exception $e)
+        {
+            $apiResult = ApiResult::Error('ContactDelete_DeleteFailed', 'Delete failed, the server encountered an error.');
+            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+        }
     }
 
 
@@ -173,6 +190,7 @@ class ContactsController extends Controller
     private function transform($contact) 
     {
         return [
+            'id'        => $contact['id'],
             'firstname' => $contact['firstname'],
             'middlename'=> $contact['middlename'],
             'lastname'  => $contact['lastname'],
@@ -181,7 +199,6 @@ class ContactsController extends Controller
             'address'   => $contact['address'],
             'age'       => $contact['age'],
             'birthday'  => $contact['birthday'],
-            'BelongsTo' => $contact['user']['firstname'],
         ];
     }
 }

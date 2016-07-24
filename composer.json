@@ -20,7 +20,9 @@
             "database"
         ],
         "files": [
-            "app/Http/Controllers/ControllerHelpers.php"
+            "app/Http/Controllers/_Helpers/ApiError.php",
+            "app/Http/Controllers/_Helpers/ApiResult.php",
+            "app/Http/Controllers/_Helpers/HttpStatusCode.php"
         ],
         "psr-4": {
             "App\\": "app/"

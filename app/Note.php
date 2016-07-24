@@ -13,15 +13,12 @@ class Note extends Model
      */
     protected $fillable = [
         'user_id',
-        'url_name',
-        'firstname', 
-        'middlename', 
-        'lastname',
-        'phone',
-        'email',
-        'address',
-        'age',
-        'birthday',
+        'contact_id',
+        'type_id',
+        'title', 
+        'body', 
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -29,17 +26,27 @@ class Note extends Model
      *
      * @var array
      */
-    protected $hidden = ['url_name'];
+    protected $hidden = [];
 
     /**
      * The related objects that should be loaded as well.
      *
      * @var array
      */
-    protected $with = ['user'];
+    protected $with = ['user', 'notetype', 'contact'];
 
     public function user() 
     {
         return $this->belongsTo('App\User', 'user_id');
+    }
+
+    public function contact()
+    {
+        return $this->belongsTo('App\Contact', 'contact_id');
+    }
+
+    public function notetype()
+    {
+        return $this->belongsTo('App\NoteType', 'type_id');
     }
 }

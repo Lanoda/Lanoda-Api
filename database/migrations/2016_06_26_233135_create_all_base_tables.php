@@ -78,7 +78,8 @@ class CreateAllBaseTables extends Migration
         // Notes
         Schema::create('notes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('contact_id')->unsigned();
+            $table->integer('user_id')->unsigned();
+            $table->integer('contact_id')->unsigned()->nullable();
             $table->integer('type_id')->unsigned();
             $table->string('title');
             $table->string('body');
@@ -146,6 +147,7 @@ class CreateAllBaseTables extends Migration
             $table->foreign('user_id')
                   ->references('id')->on('users')
                   ->onDelete('cascade');
+
             $table->foreign('image_id')
                   ->references('id')->on('images')
                   ->onDelete('cascade');
@@ -153,9 +155,14 @@ class CreateAllBaseTables extends Migration
 
         // Notes
         Schema::table('notes', function (Blueprint $table) {
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->onDelete('cascade');
+
             $table->foreign('contact_id')
                   ->references('id')->on('contacts')
                   ->onDelete('cascade');
+
             $table->foreign('type_id')
                   ->references('id')->on('note_types')
                   ->onDelete('cascade');

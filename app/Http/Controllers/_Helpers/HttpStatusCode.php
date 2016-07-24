@@ -2,39 +2,6 @@
 
 namespace App\Http\Controllers\Helpers;
 
-class ApiResult
-{
-    public $Content;
-    public $IsSuccess;
-    public $Errors;
-
-    public function __construct($content, $isSuccess, $errors = array()) 
-    {
-        $this->Content = $content;
-        $this->IsSuccess = $isSuccess;
-
-        if ($errors == null) 
-        {
-            $errors = array();
-        }
-        $this->Errors = $errors;
-    }
-}
-
-class ApiError
-{
-    public $Id;
-    public $Message;
-    public $Time;
-
-    public function __construct($id, $message)
-    {
-        $this->Id = $id;
-        $this->Message = $message;
-        $this->Time = time();
-    }
-}
-
 class HttpStatusCode
 {
     // (1XX) Informational
@@ -116,4 +83,3 @@ class HttpStatusCode
     const NetworkReadTimeoutError = 598;
     const NetworkConnectTimeoutError = 599;
 }
-

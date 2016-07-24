@@ -21,16 +21,22 @@ Route::group(['prefix' => 'api-token'], function() {
 });
 
 
-Route::group(['prefix' => 'users/{user}', 'middleware' => 'api'], function () {
+// User-specific methods
+Route::group(['middleware' => 'api'], function () {
 
 	// Contacts
 	Route::delete('contacts/{contact}', 'Contact\ContactsController@destroy');
-	Route::get('contacts', 'Contact\ContactsController@index');
+	Route::get('contacts', 'Contact\ContactsController@showlist');
 	Route::get('contacts/{contact}', 'Contact\ContactsController@show');
 	Route::post('contacts', 'Contact\ContactsController@store');
 	Route::put('contacts/{contact}', 'Contact\ContactsController@update');
 
 	// Notes
-	Route::resource('notes', 'Note\NotesController');
+	Route::delete('notes/{note}', 'Note\NotesController@destroy');
+	Route::get('notes', 'Note\NotesController@showlist');
+	Route::get('contacts/{contact}/notes', 'Note\NotesController@showlistForContact');
+	Route::get('notes/{note}', 'Note\NotesController@show');
+	Route::post('notes', 'Note\NotesController@store');
+	Route::put('notes/{note}', 'Note\NotesController@update');
 });
 

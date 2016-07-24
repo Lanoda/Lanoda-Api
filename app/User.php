@@ -33,4 +33,9 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Contact');
     }
+
+    public function notes()
+    {
+        return $this->hasMany('App\Note');
+    }
 }

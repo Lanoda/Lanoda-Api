@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Contact extends Model
+class NoteType extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -12,15 +12,9 @@ class Contact extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
-        'firstname', 
-        'middlename', 
-        'lastname',
-        'phone',
-        'email',
-        'address',
-        'age',
-        'birthday',
+        'name',
+        'description',
+        'icon',
     ];
 
     /**
@@ -37,12 +31,7 @@ class Contact extends Model
      */
     protected $with = [];
 
-    public function user() 
-    {
-        return $this->belongsTo('App\User', 'user_id');
-    }
-
-    public function notes()
+    public function notes() 
     {
         return $this->hasMany('App\Note');
     }
