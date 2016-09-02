@@ -22,11 +22,18 @@ class ApiTokensTest extends TestCase
 		$this->assertResponseOk();
 
 		$this->seeJsonStructure([
-			'data' => ['api_token']
+			'Content' => ['api_token']
 		]);
 
-		$res_array = (array)json_decode($this->response->content());
-		$this->assertEquals($client->client_id, $res_array["data"]->api_token->client_id);
+		// $res_array = (array)json_decode($this->response->content());
+		$responseData = json_decode($this->response->content(), true);
+
+		$this->assertArrayHasKey('IsSuccess', $responseData);
+		$this->assertTrue($responseData['IsSuccess']);
+
+		$this->assertArrayHasKey('Content', $responseData);
+		$this->assertNotNull($responseData['Content']);
+		$this->assertEquals($client->client_id, $responseData['Content']['client_id']);
 	}
 }
 

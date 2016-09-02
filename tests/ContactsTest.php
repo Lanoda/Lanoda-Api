@@ -12,7 +12,7 @@ class ContactsTest extends TestCase
 	{
 		$testApiToken = factory(App\ApiToken::class)->create();
 
-		$this->call('GET', '/users/'.$testApiToken->user_id.'/contacts', [], [], [], ['HTTP_lanoda-api-token' => $testApiToken->api_token]);
+		$this->call('GET', '/contacts', [], [], [], ['HTTP_lanoda-api-token' => $testApiToken->api_token]);
 		$this->assertResponseOk();
 	}
 }
