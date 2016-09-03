@@ -29,6 +29,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Role');
     }
 
+    public function image()
+    {
+        return $this->belongsTo('App\Image', 'image_id');
+    }
+
     public function contacts()
     {
         return $this->hasMany('App\Contact');

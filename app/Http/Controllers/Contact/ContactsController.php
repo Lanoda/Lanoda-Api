@@ -124,7 +124,7 @@ class ContactsController extends Controller
         );
 
         $authUser = Auth::user();
-        if ($authUser->id = $contact->user_id)
+        if ($authUser->id != $contact->user_id)
         {
             $apiResult = ApiResult::Error('ContactUpdate_Unauthorized', 'You are not authorized to access this resource.');
             return Response::json($apiResult, HttpStatusCode::Unauthorized);

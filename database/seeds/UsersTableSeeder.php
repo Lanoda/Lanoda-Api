@@ -43,7 +43,7 @@ class UsersTableSeeder extends Seeder
             }
             else
             {
-				$existing_user = factory(App\User::class)->create($user);
+				$existing_user = User::create($user);
             }
 
             // Add the 'Admin' role to user with Id '1'
