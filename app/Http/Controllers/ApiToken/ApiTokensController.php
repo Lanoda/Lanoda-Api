@@ -28,7 +28,7 @@ class ApiTokensController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * [Deprecated] Display a listing of the resource.
      *
      * @return Response
      */
@@ -78,7 +78,7 @@ class ApiTokensController extends Controller
     public function refreshApiToken(Request $request)
     {
         // Get existing ApiToken.
-        $apiToken = ApiToken::where('api_token', $request->header('lanoda-api-token'))->first();
+        $apiToken = ApiToken::where('refresh_token', $request->input('refresh_token'))->first();
         if ($apiToken == null)
         {
             $apiResult = ApiResult::Error('ApiTokenRefresh_ApiTokenNotFound', 'Api Token not found.');
@@ -95,7 +95,8 @@ class ApiTokensController extends Controller
         // Update ApiToken.
         $newApiToken = [
             'api_token' => str_random(32),
-            'expires' => Carbon::now()->addDay()
+            'refresh_token' => str_random(48),
+            'expires' => Carbon::now()->addWeek()
         ];
         $apiToken->update($newApiToken);
 

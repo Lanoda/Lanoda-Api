@@ -20,6 +20,7 @@ class ApiTokensTableSeeder extends Seeder
             $clientId = 'Lanoda - Android Application';
             $apiToken = [
                 'api_token' => str_random(32),
+                'refresh_token' => str_random(48),
                 'client_id' => $clientId,
                 'user_id' => $userId,
                 'expires' => Carbon::now()->addWeek()

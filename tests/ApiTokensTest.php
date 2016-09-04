@@ -11,18 +11,19 @@ class ApiTokensTest extends TestCase
 	public function testApiTokenCreate () 
 	{
 		$client = factory(App\ApiClient::class)->create();
-		$user = factory(App\User::class)->create();
+		$password = str_random(10);
+		$user = factory(App\User::class)->create(['password' => bcrypt($password)]);
 
-		$this->json('POST', '/api-token/request', [
-			'client_id' => $client->client_id, 
-			'client_secret' => $client->client_secret, 
-			'email' => $user->email
+		$this->json('POST', '/authorize/client', [
+			'client_id' => $client->client_id,
+			'email' => $user->email,
+			'password' => $password
 		]);
 
 		$this->assertResponseOk();
 
 		$this->seeJsonStructure([
-			'Content' => ['api_token']
+			'Content' => ['api_token', 'refresh_token']
 		]);
 
 		// $res_array = (array)json_decode($this->response->content());

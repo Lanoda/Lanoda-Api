@@ -21,6 +21,7 @@ $factory->define(App\ApiClient::class, function (Faker\Generator $faker) {
 $factory->define(App\ApiToken::class, function (Faker\Generator $faker) {
 	return [
 		'api_token' => str_random(32),
+		'refresh_token' => str_random(48),
 		'client_id' => factory(App\ApiClient::class)->create()->client_id,
 		'user_id' => factory(App\User::class)->create()->id,
 		'expires' => Carbon\Carbon::now()->addDay()

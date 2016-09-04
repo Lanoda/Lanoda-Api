@@ -124,6 +124,7 @@ class CreateAllBaseTables extends Migration
         Schema::create('api_tokens', function (Blueprint $table) {
             $table->increments('id');
             $table->string('api_token', 32)->unique();
+            $table->string('refresh_token', 48)->unique();
             $table->string('client_id');
             $table->integer('user_id')->unsigned();
             $table->dateTime('expires');

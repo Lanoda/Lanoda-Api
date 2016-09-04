@@ -12,11 +12,15 @@
 */
 
 Route::get('/', function () {
-    return view('welcome', ['apiTokens' => App\ApiToken::all(), 'apiClients' => App\ApiClient::all()]);
+    return view('welcome');
+});
+
+Route::group(['prefix' => 'authorize'], function() {
+	Route::post('client', 'ApiClient\ApiClientsController@authorizeClient');
 });
 
 Route::group(['prefix' => 'api-token'], function() {
-	Route::post('request', 'ApiToken\ApiTokensController@requestApiToken');
+	//Route::post('request', 'ApiToken\ApiTokensController@requestApiToken');
 	Route::put('refresh', 'ApiToken\ApiTokensController@refreshApiToken');
 });
 

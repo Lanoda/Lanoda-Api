@@ -13,18 +13,15 @@ class ApiClientsTableSeeder extends Seeder
     public function run()
     {
     	$apiClients = [
-    		'Lanoda - Android Application',
-    		'Lanoda - iOS Application'
+    		['id' => 1, 'client_id' => 'Lanoda - Android Application', 'client_secret' => 'jghAFKxtS4KFm1EhT1YH9UO27JKRjahn'],
+    		['id' => 2, 'client_id' => 'Lanoda - iOS Application', 'client_secret' => 'ngSZS5RrHOByFn91uqjZ8rW5obrjRr1Y']
     	];
 
-    	foreach($apiClients as $apiClientId) 
+    	foreach($apiClients as $apiClient) 
     	{
-    		$apiClient = [
-    			'client_id' => $apiClientId,
-    			'client_secret' => str_random(32)
-    		];
-    		$existingApiClient = ApiClient::where('client_id', $apiClientId)->first();
+    		$existingApiClient = ApiClient::find($apiClient['id']);
     		if ($existingApiClient != null) {
+				unset($apiClient['id']);
     			$existingApiClient->update($apiClient);
     		} else {
 	    		ApiClient::create($apiClient);

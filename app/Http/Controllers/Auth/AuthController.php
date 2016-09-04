@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
-use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
+use App\User;
+use App\ApiClient;
+use App\ApiToken;
+use Validator;
+
 
 class AuthController extends Controller
 {
