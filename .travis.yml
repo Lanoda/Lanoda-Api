@@ -3,3 +3,7 @@ install: composer install --dev
 php:
   - '7.0'
   - nightly
+  
+addons:
+    code_climate:
+        repo_token: 5011f2ccbcb24ab129e7719f3abd9226589730e9cf1dcb77600f2a2a703ab3eb
