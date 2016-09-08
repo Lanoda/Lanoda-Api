@@ -7,3 +7,5 @@ php:
 addons:
     code_climate:
         repo_token: 7e894ace02d54251c699ff1591448234e29dabf6
+after_script:
+  - vendor/bin/test-reporter
