@@ -20,6 +20,12 @@ class ApiError
             'AuthorizeApp_ClientNotFound' => 'ApiClient was not found.',
             'AuthorizeApp_MissingRequiredParameters' => 'Missing required parameters.',
             'AuthorizeApp_InvalidCredentials' => 'Invalid Credentials.',
+
+            'ApiTokenRequest_InvalidClientCredentials' => 'Invalid Client credentials.',
+            'ApiTokenRequest_UserNotFound' => 'User not found.',
+
+            'ApiTokenRefresh_ApiTokenNotFound' => 'Api Token not found.',
+            'ApiTokenRefresh_InvalidCredentials' => 'Invalid credentials, \'client_id\'.',
         );
 
         return $error[$errorId];
