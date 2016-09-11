@@ -26,6 +26,20 @@ class ApiError
 
             'ApiTokenRefresh_ApiTokenNotFound' => 'Api Token not found.',
             'ApiTokenRefresh_InvalidCredentials' => 'Invalid credentials, \'client_id\'.',
+
+            'ContactCreate_PrimaryFieldRequired' => 'A Contact must have at least one of the following: \'firstname\', \'lastname\', \'email\', or \'phone\'.',
+            'ContactUpdate_Unauthorized' => 'You are not authorized to access this resource.',
+            'ContactUpdate_UpdateFailed' => 'Update failed, the server encountered an error.',
+            'ContactDelete_Unauthorized', 'Delete failed, You are not authorized to access this resource.',
+            'ContactDelete_DeleteFailed', 'Delete failed, the server encountered an error.',
+
+            'NoteGet_Unauthorized' => 'You are not authorized to access this resource.',
+            'NoteCreate_InternalServerError' => 'Create failed, the server encountered an error.',
+            'NoteGet_Unauthorized' => 'You are unauthorized to access this resource.',
+            'NoteUpdate_Unauthorized' => 'Update failed, you are not authorized to access this resource.',
+            'NoteUpdate_InternalServerError' => 'Update Note failed, the server encountered an error.',
+            'NoteDelete_Unauthorized' => 'Delete failed, you are not authorized to access this resource.',
+            'NoteDelete_InternalServerError', 'Delete failed, the server encountered an error.',
         );
 
         return $error[$errorId];

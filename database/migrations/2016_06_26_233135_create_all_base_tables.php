@@ -12,6 +12,24 @@ class CreateAllBaseTables extends Migration
      */
     public function up()
     {
+        $this->upUsers();
+        $this->upPasswordResets();
+        $this->upContacts();
+        $this->upTags();
+        $this->upImages();
+        $this->upContactTypes();
+        $this->upNotes();
+        $this->upNoteTypes();
+        $this->upRoles();
+        $this->upRoleUser();
+        $this->upApiClients();
+        $this->upApiTokens();
+
+        $this->setForeignKeys();
+    }
+
+    private function upUsers()
+    {
         // Users
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
@@ -24,14 +42,20 @@ class CreateAllBaseTables extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+    }
 
+    private function upPasswordResets()
+    {
         // Password Resets
         Schema::create('password_resets', function (Blueprint $table) {
             $table->string('email')->index();
             $table->string('token')->index();
             $table->timestamp('created_at');
         });
+    }
 
+    private function upContacts()
+    {
         // Contacts
         Schema::create('contacts', function (Blueprint $table) {
             $table->increments('id');
@@ -47,7 +71,10 @@ class CreateAllBaseTables extends Migration
             $table->date('birthday')->nullable();
             $table->timestamps();
         });
+    }
 
+    private function upTags()
+    {
         // Tags
         Schema::create('tags', function (Blueprint $table) {
             $table->increments('id');
@@ -55,7 +82,10 @@ class CreateAllBaseTables extends Migration
             $table->string('color');
             $table->timestamps();
         });
-        
+    }
+
+    private function upImages()
+    {
         // Images
         Schema::create('images', function (Blueprint $table) {
             $table->increments('id');
@@ -65,7 +95,10 @@ class CreateAllBaseTables extends Migration
             $table->string('size');
             $table->timestamps();
         });
-        
+    }
+
+    private function upContactTypes()
+    {
         // ContactTypes
         Schema::create('contact_types', function (Blueprint $table) {
             $table->increments('id');
@@ -74,7 +107,10 @@ class CreateAllBaseTables extends Migration
             $table->string('icon')->nullable();
             $table->timestamps();
         });
-        
+    }
+
+    private function upNotes()
+    {
         // Notes
         Schema::create('notes', function (Blueprint $table) {
             $table->increments('id');
@@ -85,7 +121,10 @@ class CreateAllBaseTables extends Migration
             $table->string('body');
             $table->timestamps();
         });
-        
+    }
+
+    private function upNoteTypes()
+    {
         // NoteTypes
         Schema::create('note_types', function (Blueprint $table) {
             $table->increments('id');
@@ -94,7 +133,10 @@ class CreateAllBaseTables extends Migration
             $table->string('icon')->nullable();
             $table->timestamps();
         });
+    }
 
+    private function upRoles()
+    {
         // Roles
         Schema::create('roles', function (Blueprint $table) {
             $table->increments('id');
@@ -102,7 +144,10 @@ class CreateAllBaseTables extends Migration
             $table->string('description');
             $table->timestamps();
         });
+    }
 
+    private function upRoleUser()
+    {
         // RoleUser
         Schema::create('role_user', function (Blueprint $table) {
             $table->integer('role_id')->unsigned();
@@ -111,7 +156,10 @@ class CreateAllBaseTables extends Migration
 
             $table->primary(array('role_id', 'user_id'));
         });
+    }
 
+    private function upApiClients()
+    {
         // Api Clients
         Schema::create('api_clients', function (Blueprint $table) {
             $table->increments('id');
@@ -119,7 +167,10 @@ class CreateAllBaseTables extends Migration
             $table->string('client_secret', 32);
             $table->timestamps();
         });
+    }
 
+    private function upApiTokens()
+    {
         // Api Tokens
         Schema::create('api_tokens', function (Blueprint $table) {
             $table->increments('id');
@@ -130,8 +181,10 @@ class CreateAllBaseTables extends Migration
             $table->dateTime('expires');
             $table->timestamps();
         });
+    }
 
-
+    private function setForeignKeys()
+    {
         // ***********************************
         // * Add Foreign Keys
         // ***********************************
@@ -181,6 +234,8 @@ class CreateAllBaseTables extends Migration
         });
     }
 
+
+
     /**
      * Reverse the migrations.
      *
@@ -188,77 +243,31 @@ class CreateAllBaseTables extends Migration
      */
     public function down()
     {
+        $tables = Array(
+            'tags',
+            'notes',
+            'note_types',
+            'contacts',
+            'role_user',
+            'api_tokens',
+            'users',
+            'api_clients',
+            'contact_types',
+            'password_resets',
+            'images',
+            'roles',
+        );
 
-        // Tags
-        if (Schema::hasTable('tags'))
-        {
-            Schema::drop('tags');
+        foreach($tables as $table) {
+            $this->DropIfHasTable($table);
         }
+    }
 
-        // Drop Notes
-        if (Schema::hasTable('notes')) 
-        {
-            Schema::drop('notes');
-        }
-
-        // Drop NoteTypes
-        if (Schema::hasTable('note_types')) 
-        {
-            Schema::drop('note_types');
-        }
-
-        // Drop Contacts
-        if (Schema::hasTable('contacts'))
-        {
-            Schema::drop('contacts');
-        }
-
-        // Drop RoleUser
-        if (Schema::hasTable('role_user')) 
-        {
-            Schema::drop('role_user');
-        }
-
-        // Drop ApiTokens
-        if (Schema::hasTable('api_tokens'))
-        {
-            Schema::drop('api_tokens');
-        }
-
-        // Drop Users
-        if (Schema::hasTable('users')) 
-        {
-            Schema::drop('users');
-        }
-        
-        // Drop ApiClients
-        if (Schema::hasTable('api_clients'))
-        {
-            Schema::drop('api_clients');
-        }
-
-        // ContactTypes
-        if (Schema::hasTable('contact_types'))
-        {
-            Schema::drop('contact_types');
-        }
-
-        // Drop PasswordResets
-        if (Schema::hasTable('password_resets'))
-        {
-            Schema::drop('password_resets');
-        }
-
-        // Images
-        if (Schema::hasTable('images'))
-        {
-            Schema::drop('images');
-        }
-
-        // Drop Roles
-        if (Schema::hasTable('roles'))
-        {
-            Schema::drop('roles');
+    // Drop table if Schema has it.
+    private function DropIfHasTable($table)
+    {
+        if (Schema::hasTable($table)) {
+            Schema::drop($table);
         }
     }
 }

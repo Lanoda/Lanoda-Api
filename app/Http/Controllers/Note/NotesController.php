@@ -37,13 +37,12 @@ class NotesController extends Controller
      */
     public function showlist(Request $request)
     {
-        $authUser = Auth::user();
-
-        $notes = Note::where('user_id', $authUser->id);
+        $notes = Note::where('user_id', Auth::user()->id);
         $transformCollection = 'App\Http\Controllers\Note\NotesController::transformCollection';
-        $content = ModelHelper::GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
+        $modelHelper = new ModelHelper();
+        $content = $modelHelper->GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
         $apiResult = new ApiResult($content, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -53,18 +52,18 @@ class NotesController extends Controller
      */
     public function showlistForContact(Request $request, Contact $contact)
     {
-        $authUser = Auth::user();
-        if ($authUser->id != $contact->user_id)
+        if (Auth::user()->id != $contact->user_id)
         {
-            $apiResult = ApiResult::Error('NoteGet_Unauthorized', 'You are not authorized to access this resource.');
-            return Response::Json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('NoteGet_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         $notes = Note::where('contact_id', $contact->id);
         $transformCollection = 'App\Http\Controllers\Note\NotesController::transformCollection';
-        $content = ModelHelper::GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
+        $modelHelper = new ModelHelper();
+        $content = $modelHelper->GetListResult($notes, $request->all(), 'Notes', 'id', $transformCollection);
         $apiResult = new ApiResult($content, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -74,7 +73,7 @@ class NotesController extends Controller
      */
     public function create(Request $request)
     {
-        
+        throw new Exception('Unimplemented' . $request->all());
     }
 
     /**
@@ -84,20 +83,18 @@ class NotesController extends Controller
      */
     public function store(Request $request)
     {
-        $authUser = Auth::user();
-
         try
         {
             $noteModel = $request->all();
-            $noteModel["user_id"] = $authUser->id;
+            $noteModel["user_id"] = Auth::user()->id;
             $note = Note::create($noteModel);
             $apiResult = new ApiResult($this->transform($note), true);
-            return Response::json($apiResult, HttpStatusCode::Ok);
+            return $apiResult->GetJsonResponse('Ok');
         }
         catch (Exception $e)
         {
-            $apiResult = ApiResult::Error('NoteCreate_InternalServerError', 'Create failed, the server encountered an error.');
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            $apiResult = new ApiErrorResult('NoteCreate_InternalServerError');
+            return $apiResult->GetJsonResponse('InternalServerError');
         }
     }
 
@@ -109,15 +106,14 @@ class NotesController extends Controller
      */
     public function show(Request $request, Note $note)
     {
-        $authUser = Auth::user();
-        if ($authUser->id != $note->user_id)
+        if (Auth::user()->id != $note->user_id)
         {
-            $apiResult = ApiResult::Error('NoteGet_Unauthorized', 'You are unauthorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('NoteGet_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         $apiResult = new ApiResult($this->transform($note), true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -128,7 +124,7 @@ class NotesController extends Controller
      */
     public function edit($id)
     {
-
+        throw new Exception('Unimplemented' . $id);
     }
 
     /**
@@ -143,25 +139,23 @@ class NotesController extends Controller
             'user_id'    => 'required',
             'email'      => 'required|email',
         );
-        $authUser = Auth::user();
-        if ($authUser->id != $note->user_id)
+
+        if (Auth::user()->id != $note->user_id)
         {
-            $apiResult = ApiResult::Error('NoteUpdate_Unauthorized', 'Update failed, you are not authorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('NoteUpdate_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         try 
         {
             $note->update($request->all(), $rules);
-            $note->save();
-
             $apiResult = new ApiResult($this->transform($note), true);
-            return Response::json($apiResult, HttpStatusCode::Ok);
+            return $apiResult->GetJsonResponse('Ok');
         }
         catch(Exception $e) 
         {
-            $apiResult = ApiResult::Error('NoteUpdate_InternalServerError', 'Update Note failed, the server encountered an error.');
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            $apiResult = new ApiErrorResult('NoteUpdate_InternalServerError');
+            return $apiResult->GetJsonResponse('InternalServerError');
         }
 
     }
@@ -174,11 +168,10 @@ class NotesController extends Controller
      */
     public function destroy(Note $note)
     {
-        $authUser = Auth::user();
-        if ($authUser->id != $note->user_id) 
+        if (Auth::user()->id != $note->user_id)
         {
-            $apiResult = ApiResult::Error('NoteDelete_Unauthorized', 'Delete failed, you are not authorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('NoteDelete_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         try
@@ -186,12 +179,12 @@ class NotesController extends Controller
             $note->delete();
 
             $apiResult = new ApiResult(null, true);
-            return Response::json($apiResult, HttpStatusCode::NoContent);
+            return $apiResult->GetJsonResponse('NoContent');
         }
         catch (Exception $e)
         {
-            $apiResult = ApiResult::Error('NoteDelete_InternalServerError', 'Delete failed, the server encountered an error.');
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            $apiResult = new ApiErrorResult('NoteDelete_InternalServerError');
+            return $apiResult->GetJsonResponse('InternalServerError');
         }
     }
 

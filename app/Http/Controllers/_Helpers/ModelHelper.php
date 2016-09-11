@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Helpers;
 
 class ModelHelper 
 {
+    public function __construct() 
+    { 
+
+    }
+
     /**
      * Apply Filters to an eloquent set.
      *
@@ -138,7 +143,7 @@ class ModelHelper
     /**
      * Apply commonly-used methods and create result
      */
-     public static function GetListResult($set, array $requestVars, $listTitle, $primaryKey, $transformFunc) 
+     public function GetListResult($set, array $requestVars, $listTitle, $primaryKey, $transformFunc) 
      {
         $pageIndex = $requestVars['pageIndex'] ?? 0;
         $pageSize = $requestVars['pageSize'] ?? 48;

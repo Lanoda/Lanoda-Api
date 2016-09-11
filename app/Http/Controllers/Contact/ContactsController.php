@@ -36,14 +36,14 @@ class ContactsController extends Controller
      */
     public function showlist(Request $request)
     {
-        $authUser = Auth::user();
-        $contacts = Contact::where('user_id', $authUser->id);
+        $contacts = Contact::where('user_id', Auth::user()->id);
 
         $transformCollection = 'App\Http\Controllers\Contact\ContactsController::transformCollection';
-        $content = ModelHelper::GetListResult($contacts, $request->all(), 'Contacts', 'id', $transformCollection);
+        $modelHelper = new ModelHelper();
+        $content = $modelHelper->GetListResult($contacts, $request->all(), 'Contacts', 'id', $transformCollection);
         
         $apiResult = new ApiResult($content, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -53,7 +53,7 @@ class ContactsController extends Controller
      */
     public function create(Request $request)
     {
-        
+        throw new Exception('Unimplemented' . $request->all());
     }
 
     /**
@@ -63,21 +63,21 @@ class ContactsController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->input('firstname') == null && $request->input('lastname') == null 
-            && $request->input('email') == null && $request->input('phone') == null)
+        if ($request->input('firstname') == null
+            && $request->input('lastname') == null
+            && $request->input('email') == null
+            && $request->input('phone') == null)
         {
-            $errorMsg = 'A Contact must have at least one of the following: \'firstname\', \'lastname\', \'email\', or \'phone\'.';
-            $apiResult = ApiRequest::Error('ContactCreate_PrimaryFieldRequired', $errorMsg);
-            return Response::json($apiResult, HttpStatuscode::BadRequest);
+            $apiResult = new ApiErrorResult('ContactCreate_PrimaryFieldRequired');
+            return $apiResult->GetJsonResponse('BadRequest');
         }
 
-        $authUser = Auth::user();
         $contactModel = $request->all();
-        $contactModel["user_id"] = $authUser->id;
+        $contactModel["user_id"] = Auth::user()->id;
 
         $contact = Contact::create($request->all());
         $apiResult = new ApiResult($contact, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -107,7 +107,7 @@ class ContactsController extends Controller
      */
     public function edit($id)
     {
-
+        throw new Exception('Unimplemented' . $id);
     }
 
     /**
@@ -126,8 +126,8 @@ class ContactsController extends Controller
         $authUser = Auth::user();
         if ($authUser->id != $contact->user_id)
         {
-            $apiResult = ApiResult::Error('ContactUpdate_Unauthorized', 'You are not authorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('ContactUpdate_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         try 
@@ -136,12 +136,12 @@ class ContactsController extends Controller
             $contact->save();
 
             $apiResult = new ApiResult($this->transform($contact), true);
-            return Response::json($apiResult, HttpStatusCode::Ok);
+            return $apiResult->GetJsonResponse('Ok');
         }
         catch(Exception $e)
         {
-            $apiResult = ApiResult::Error('ContactUpdate_UpdateFailed', 'Update failed, the server encountered an error.');
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            $apiResult = new ApiErrorResult('ContactUpdate_UpdateFailed');
+            return $apiResult->GetJsonResponse('InternalServerError');
         }
 
     }
@@ -157,8 +157,8 @@ class ContactsController extends Controller
         $authUser = Auth::user();
         if ($authUser->id != $contact->user_id)
         {
-            $apiResult = ApiResult::Error('ContactDelete_Unauthorized', 'Delete failed, You are not authorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('ContactDelete_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         try 
@@ -166,12 +166,12 @@ class ContactsController extends Controller
             $contact->delete();
 
             $apiResult = new ApiResult(null, true);
-            return Response::json($apiResult, HttpStatusCode::NoContent);
+            return $apiResult->GetJsonResponse('NoContent');
         }
         catch (Exception $e)
         {
-            $apiResult = ApiResult::Error('ContactDelete_DeleteFailed', 'Delete failed, the server encountered an error.');
-            return Response::json($apiResult, HttpStatusCode::InternalServerError);
+            $apiResult = new ApiErrorResult('ContactDelete_DeleteFailed');
+            return $apiResult->GetJsonResponse('InternalServerError');
         }
     }
 

@@ -32,9 +32,11 @@ class ApiResult
     {
         $statusCodes = Array(
             'Ok' => HttpStatusCode::Ok,
+            'NoContent' => HttpStatusCode::NoContent,
             'BadRequest' => HttpStatusCode::BadRequest,
             'NotFound' => HttpStatusCode::NotFound,
             'Unauthorized' => HttpStatusCode::Unauthorized,
+            'InternalServerError' => HttpStatusCode::InternalServerError,
         );
 
         return $statusCodes[$code];
