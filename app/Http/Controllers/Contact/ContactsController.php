@@ -47,16 +47,6 @@ class ContactsController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create(Request $request)
-    {
-        throw new Exception('Unimplemented' . $request->all());
-    }
-
-    /**
      * Create a new resource.
      *
      * @return Response
@@ -88,26 +78,14 @@ class ContactsController extends Controller
      */
     public function show(Contact $contact)
     {
-        $authUser = Auth::user();
-        if ($authUser->id != $contact->user_id)
+        if (Auth::user()->id != $contact->user_id)
         {
-            $apiResult = ApiResult::Error('ContactGet_Unauthorized', 'You are not authorized to access this resource.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('ContactGet_Unauthorized');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         $apiResult = new ApiResult($this->transform($contact), true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
-    }
-
-    /**
-     * Display a form for editing the resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        throw new Exception('Unimplemented' . $id);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
     /**
@@ -123,8 +101,7 @@ class ContactsController extends Controller
             'email'      => 'required|email',
         );
 
-        $authUser = Auth::user();
-        if ($authUser->id != $contact->user_id)
+        if (Auth::user()->id != $contact->user_id)
         {
             $apiResult = new ApiErrorResult('ContactUpdate_Unauthorized');
             return $apiResult->GetJsonResponse('Unauthorized');
@@ -143,7 +120,6 @@ class ContactsController extends Controller
             $apiResult = new ApiErrorResult('ContactUpdate_UpdateFailed');
             return $apiResult->GetJsonResponse('InternalServerError');
         }
-
     }
 
     /**
@@ -154,8 +130,7 @@ class ContactsController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        $authUser = Auth::user();
-        if ($authUser->id != $contact->user_id)
+        if (Auth::user()->id != $contact->user_id)
         {
             $apiResult = new ApiErrorResult('ContactDelete_Unauthorized');
             return $apiResult->GetJsonResponse('Unauthorized');

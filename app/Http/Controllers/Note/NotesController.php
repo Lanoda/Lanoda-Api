@@ -67,16 +67,6 @@ class NotesController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create(Request $request)
-    {
-        throw new Exception('Unimplemented' . $request->all());
-    }
-
-    /**
      * Create a new resource.
      *
      * @return Response
@@ -104,7 +94,7 @@ class NotesController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function show(Request $request, Note $note)
+    public function show(Note $note)
     {
         if (Auth::user()->id != $note->user_id)
         {
@@ -114,17 +104,6 @@ class NotesController extends Controller
 
         $apiResult = new ApiResult($this->transform($note), true);
         return $apiResult->GetJsonResponse('Ok');
-    }
-
-    /**
-     * Display a form for editing the resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        throw new Exception('Unimplemented' . $id);
     }
 
     /**

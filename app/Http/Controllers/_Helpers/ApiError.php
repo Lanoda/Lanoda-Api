@@ -28,10 +28,11 @@ class ApiError
             'ApiTokenRefresh_InvalidCredentials' => 'Invalid credentials, \'client_id\'.',
 
             'ContactCreate_PrimaryFieldRequired' => 'A Contact must have at least one of the following: \'firstname\', \'lastname\', \'email\', or \'phone\'.',
+            'ContactGet_Unauthorized' => 'You are not authorized to access this resource.',
             'ContactUpdate_Unauthorized' => 'You are not authorized to access this resource.',
             'ContactUpdate_UpdateFailed' => 'Update failed, the server encountered an error.',
-            'ContactDelete_Unauthorized', 'Delete failed, You are not authorized to access this resource.',
-            'ContactDelete_DeleteFailed', 'Delete failed, the server encountered an error.',
+            'ContactDelete_Unauthorized' => 'Delete failed, You are not authorized to access this resource.',
+            'ContactDelete_DeleteFailed' => 'Delete failed, the server encountered an error.',
 
             'NoteGet_Unauthorized' => 'You are not authorized to access this resource.',
             'NoteCreate_InternalServerError' => 'Create failed, the server encountered an error.',
