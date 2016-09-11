@@ -27,5 +27,7 @@ class ApiClientsTableSeeder extends Seeder
 	    		ApiClient::create($apiClient);
     		}
     	}
+		
+		$this->command->info('');
     }
 }

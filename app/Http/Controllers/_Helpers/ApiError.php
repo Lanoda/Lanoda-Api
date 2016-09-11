@@ -8,10 +8,20 @@ class ApiError
     public $Message;
     public $Time;
 
-    public function __construct($id, $message)
+    public function __construct($id)
     {
         $this->Id = $id;
-        $this->Message = $message;
-        $this->Time = time();
+        $this->Message = $this->GetErrorMessage($id);
+        $this->Time = date('Y-m-d H:i:s');
+    }
+
+    private function GetErrorMessage($errorId) {
+        $error = Array(
+            'AuthorizeApp_ClientNotFound' => 'ApiClient was not found.',
+            'AuthorizeApp_MissingRequiredParameters' => 'Missing required parameters.',
+            'AuthorizeApp_InvalidCredentials' => 'Invalid Credentials.',
+        );
+
+        return $error[$errorId];
     }
 }

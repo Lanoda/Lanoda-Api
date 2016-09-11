@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Helpers;
 
+use App\Http\Controllers\Helpers\HttpStatusCode;
+use Response;
+
 class ApiResult
 {
     public $Content;
@@ -20,8 +23,30 @@ class ApiResult
         $this->Errors = $errors;
     }
 
-    public static function Error($errorId, $errorMessage)
+    public function GetJsonResponse($statusCode)
     {
-        return new ApiResult(null, false, array(new ApiError($errorId, $errorMessage)));
+        return Response::json($this, $this->GetHttpStatusCode($statusCode));
+    }
+
+    private function GetHttpStatusCode($code)
+    {
+        $statusCodes = Array(
+            'Ok' => HttpStatusCode::Ok,
+            'BadRequest' => HttpStatusCode::BadRequest,
+            'NotFound' => HttpStatusCode::NotFound,
+            'Unauthorized' => HttpStatusCode::Unauthorized,
+        );
+
+        return $statusCodes[$code];
     }
 }
+
+class ApiErrorResult extends ApiResult 
+{
+    public function __construct($errorId) {
+        $this->Content = null;
+        $this->IsSuccess = false;
+        $this->Errors = Array(new ApiError($errorId));
+    }
+}
+

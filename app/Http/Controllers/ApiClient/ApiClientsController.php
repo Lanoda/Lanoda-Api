@@ -4,7 +4,10 @@ namespace App\Http\Controllers\ApiClient;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Helpers\ApiResult;
+use App\Http\Controllers\Helpers\ApiErrorResult;
 use App\Http\Controllers\Helpers\HttpStatusCode;
+use App\Http\Controllers\Helpers\ErrorList;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Response;
@@ -38,14 +41,14 @@ class ApiClientsController extends Controller
         // Make sure ApiClient exists.
         $apiClient = ApiClient::where('client_id', $request->input('client_id'))->first();
         if ($apiClient == null) {
-            $apiResult = ApiResult::Error('AuthorizeApp_ClientNotFound', 'ApiClient was not found.');
-        	return Response::json($apiResult, HttpStatusCode::NotFound);
+            $apiResult = new ApiErrorResult('AuthorizeApp_ClientNotFound');
+        	return $apiResult->GetJsonResponse('NotFound');
         }
 
         // Verify email and password were sent.
         if ($request->input('email') == null || $request->input('password') == null) {
-            $apiResult = ApiResult::Error('AuthorizeApp_MissingRequiredParameters', 'Missing required parameters.');
-            return Response::json($apiResult, HttpStatusCode::BadRequest);
+            $apiResult = new ApiErrorResult('AuthorizeApp_MissingRequiredParameters');
+            return $apiResult->GetJsonResponse('BadRequest');
         }
 
         $email = $request->input('email');
@@ -58,8 +61,8 @@ class ApiClientsController extends Controller
             if ($request->input('register')) {
                 $user = User::create(['email' => $email, 'password' => bcrypt($password)]);
             } else {
-                $apiResult = ApiResult::Error('AuthorizeApp_InvalidCredentials', 'Invalid Credentials.');
-                return Response::json($apiResult, HttpStatusCode::Unauthorized);
+                $apiResult = new ApiErrorResult('AuthorizeApp_InvalidCredentials');
+                return $apiResult->GetJsonResponse('Unauthorized');
             }
         }
         
@@ -67,13 +70,14 @@ class ApiClientsController extends Controller
         
         // If unable to login return unauthorized result.
         if (!$authSuccess) {
-            $apiResult = ApiResult::Error('AuthorizeApp_InvalidCredentials', 'Invalid Credentials.');
-            return Response::json($apiResult, HttpStatusCode::Unauthorized);
+            $apiResult = new ApiErrorResult('AuthorizeApp_InvalidCredentials');
+            return $apiResult->GetJsonResponse('Unauthorized');
         }
 
         // After checks pass, create or update the api token.
         $matchThese = ['client_id' => $apiClient->client_id, 'user_id' => Auth::user()->id];
         $apiToken = ApiToken::where($matchThese )->first();
+
         if ($apiToken == null) {
             $apiToken = ApiToken::create([
                 'api_token' => str_random(32),
@@ -82,17 +86,20 @@ class ApiClientsController extends Controller
                 'client_id' => $apiClient->client_id,
                 'expires' => Carbon::now()->addWeek()
             ]);
-        } else {
-            $newApiToken = [
-                'api_token' => str_random(32),
-                'refresh_token' => str_random(48),
-                'expires' => Carbon::now()->addWeek()
-            ];
-            $apiToken->update($newApiToken);
+
+            $apiResult = new ApiResult($apiToken, true);
+            return $apiResult->GetJsonResponse('Ok');
         }
+        
+        $newApiToken = [
+            'api_token' => str_random(32),
+            'refresh_token' => str_random(48),
+            'expires' => Carbon::now()->addWeek()
+        ];
+        $apiToken->update($newApiToken);
 
         $apiResult = new ApiResult($apiToken, true);
-        return Response::json($apiResult, HttpStatusCode::Ok);
+        return $apiResult->GetJsonResponse('Ok');
     }
 
 }
