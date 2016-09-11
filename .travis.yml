@@ -4,4 +4,6 @@ php:
   - '7.0'
   - nightly
   
-after_script: ./codeclimate.sh
+after_script: 
+  - chmod a+x ./codeclimate.sh
+  - ./codeclimate.sh
