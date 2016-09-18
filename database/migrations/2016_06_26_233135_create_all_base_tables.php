@@ -5,6 +5,12 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateAllBaseTables extends Migration
 {
+    protected $schemaBuilder;
+
+    public function __construct() {
+        $this->schemaBuilder = app('db')->connection()->getSchemaBuilder();
+    }
+
     /**
      * Run the migrations.
      *
@@ -31,7 +37,7 @@ class CreateAllBaseTables extends Migration
     private function upUsers()
     {
         // Users
-        Schema::create('users', function (Blueprint $table) {
+        $this->schemaBuilder->create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('firstname');
             $table->string('lastname');
@@ -47,7 +53,7 @@ class CreateAllBaseTables extends Migration
     private function upPasswordResets()
     {
         // Password Resets
-        Schema::create('password_resets', function (Blueprint $table) {
+        $this->schemaBuilder->create('password_resets', function (Blueprint $table) {
             $table->string('email')->index();
             $table->string('token')->index();
             $table->timestamp('created_at');
@@ -57,7 +63,7 @@ class CreateAllBaseTables extends Migration
     private function upContacts()
     {
         // Contacts
-        Schema::create('contacts', function (Blueprint $table) {
+        $this->schemaBuilder->create('contacts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('image_id')->unsigned()->nullable();
@@ -76,7 +82,7 @@ class CreateAllBaseTables extends Migration
     private function upTags()
     {
         // Tags
-        Schema::create('tags', function (Blueprint $table) {
+        $this->schemaBuilder->create('tags', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
             $table->string('color');
@@ -87,7 +93,7 @@ class CreateAllBaseTables extends Migration
     private function upImages()
     {
         // Images
-        Schema::create('images', function (Blueprint $table) {
+        $this->schemaBuilder->create('images', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('url');
@@ -100,7 +106,7 @@ class CreateAllBaseTables extends Migration
     private function upContactTypes()
     {
         // ContactTypes
-        Schema::create('contact_types', function (Blueprint $table) {
+        $this->schemaBuilder->create('contact_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->unique();
             $table->string('description');
@@ -112,7 +118,7 @@ class CreateAllBaseTables extends Migration
     private function upNotes()
     {
         // Notes
-        Schema::create('notes', function (Blueprint $table) {
+        $this->schemaBuilder->create('notes', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->integer('contact_id')->unsigned()->nullable();
@@ -126,7 +132,7 @@ class CreateAllBaseTables extends Migration
     private function upNoteTypes()
     {
         // NoteTypes
-        Schema::create('note_types', function (Blueprint $table) {
+        $this->schemaBuilder->create('note_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('description');
@@ -138,7 +144,7 @@ class CreateAllBaseTables extends Migration
     private function upRoles()
     {
         // Roles
-        Schema::create('roles', function (Blueprint $table) {
+        $this->schemaBuilder->create('roles', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('description');
@@ -149,7 +155,7 @@ class CreateAllBaseTables extends Migration
     private function upRoleUser()
     {
         // RoleUser
-        Schema::create('role_user', function (Blueprint $table) {
+        $this->schemaBuilder->create('role_user', function (Blueprint $table) {
             $table->integer('role_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->timestamps();
@@ -161,7 +167,7 @@ class CreateAllBaseTables extends Migration
     private function upApiClients()
     {
         // Api Clients
-        Schema::create('api_clients', function (Blueprint $table) {
+        $this->schemaBuilder->create('api_clients', function (Blueprint $table) {
             $table->increments('id');
             $table->string('client_id')->unique();
             $table->string('client_secret', 32);
@@ -172,7 +178,7 @@ class CreateAllBaseTables extends Migration
     private function upApiTokens()
     {
         // Api Tokens
-        Schema::create('api_tokens', function (Blueprint $table) {
+        $this->schemaBuilder->create('api_tokens', function (Blueprint $table) {
             $table->increments('id');
             $table->string('api_token', 32)->unique();
             $table->string('refresh_token', 48)->unique();
@@ -190,14 +196,14 @@ class CreateAllBaseTables extends Migration
         // ***********************************
         
         // Users
-        Schema::table('users', function (Blueprint $table) {
+        $this->schemaBuilder->table('users', function (Blueprint $table) {
             $table->foreign('image_id')
                   ->references('id')->on('images')
                   ->onDelete('cascade');
         });
 
         // Contacts
-        Schema::table('contacts', function (Blueprint $table) {
+        $this->schemaBuilder->table('contacts', function (Blueprint $table) {
             $table->foreign('user_id')
                   ->references('id')->on('users')
                   ->onDelete('cascade');
@@ -208,7 +214,7 @@ class CreateAllBaseTables extends Migration
         });
 
         // Notes
-        Schema::table('notes', function (Blueprint $table) {
+        $this->schemaBuilder->table('notes', function (Blueprint $table) {
             $table->foreign('user_id')
                   ->references('id')->on('users')
                   ->onDelete('cascade');
@@ -223,7 +229,7 @@ class CreateAllBaseTables extends Migration
         });
 
         // Api Tokens
-        Schema::table('api_tokens', function (Blueprint $table) {
+        $this->schemaBuilder->table('api_tokens', function (Blueprint $table) {
             $table->foreign('user_id')
                   ->references('id')->on('users')
                   ->onDelete('cascade');
@@ -259,15 +265,15 @@ class CreateAllBaseTables extends Migration
         );
 
         foreach($tables as $table) {
-            $this->DropIfHasTable($table);
+            $this->dropIfHasTable($table);
         }
     }
 
     // Drop table if Schema has it.
-    private function DropIfHasTable($table)
+    private function dropIfHasTable($table)
     {
-        if (Schema::hasTable($table)) {
-            Schema::drop($table);
+        if ($this->schemaBuilder->hasTable($table)) {
+            $this->schemaBuilder->drop($table);
         }
     }
 }

@@ -49,6 +49,7 @@ class ModelHelper
                         $set = $set->where($filter->Field, '<', $values);
                         break;
 
+                    // Postgresql extension, case-insensitive 'LIKE'
                     case "il":
                         for($i = 0; $i < count($values); $i++)
                         {
