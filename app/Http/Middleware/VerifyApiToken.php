@@ -49,12 +49,10 @@ class VerifyApiToken
                         return true;
                     }
 
-                    //throw new TokenAuthenticationException;
-                    return false;
+                    throw new TokenAuthenticationException;
                 }
 
-                //throw new TokenExpiredException;
-                return false;
+                throw new TokenExpiredException;
             }
         }
 
