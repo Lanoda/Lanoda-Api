@@ -172,6 +172,7 @@ class ContactsController extends Controller
     {
         return [
             'id'        => $contact['id'],
+            'image_id'  => $contact['image_id'],
             'firstname' => $contact['firstname'],
             'middlename'=> $contact['middlename'],
             'lastname'  => $contact['lastname'],
